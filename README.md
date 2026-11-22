@@ -1,90 +1,51 @@
-# AETHER — 3D Particle Laboratory
+# M ATELIER — independent BMW M exterior study
 
-An interactive, real-time laboratory of **10 physically-driven 3D particle simulations**, rendered in the browser with WebGL2, Three.js and custom GLSL point-sprite shaders. Every effect is a live simulation — not a canned animation — with 12 live parameters, 6 color ramps, adaptive quality and microphone/file/demo audio reactivity.
+A working Three.js / TypeScript / Vite application, replacing the previous particle-lab entry point. This is an **initial exterior reference implementation, not the completed automotive digital twin requested in the brief**.
 
-![AETHER landing](docs/landing.png)
-
-## Quick start
-
-```bash
-npm ci              # install (Node ≥ 18)
-npm run dev         # local dev server (http://localhost:5173)
-npm run build       # type-check + production build → dist/
-npm run preview     # serve the production build (http://localhost:4173)
-npm test            # Vitest unit suite (44 tests)
-npm run e2e         # Playwright/Chromium end-to-end (41 checks + screenshots)
-npm run typecheck   # tsc --noEmit
+## Run
 ```
+npm ci
+npm run dev -- --host 0.0.0.0
+npm run typecheck
+npm test
+npm run audit:assets
+npm run build
+npm run preview -- --host 0.0.0.0
+npm run e2e
+```
+The E2E command requires the preview server already running on 4173. It uses packaged headless Chromium / software WebGL and extracts its bundled AL2023 libraries; screenshots go to ignored `e2e/screenshots/`. No actual Android/iPhone hardware validation has been performed.
 
-Then open the app, press **Enter the Lab**, and pick a simulation. Deep-link directly with `/?effect=blackhole` (any of the ids below).
+## Available
+- Actual attributed M4 Competition exterior GLB; no photographic or procedural car substitute.
+- Orbit drag, zoom, six axis-based camera presets, reset and optional turntable.
+- Seven paint presets, custom colour, four material finishes on the body material group.
+- Four procedural lighting/colour studies, three pixel-ratio quality settings.
+- 67 unique catalogue records; search, series/category filters, arrows and keyboard navigation.
+- Swipe on the **vehicle identity strip** changes the vehicle; dragging the canvas always orbits. This avoids conflicting gestures.
+- Unavailable records clear the old model and identity immediately and disable paint/rotation controls.
+- Responsive layout, modal catalogue, visible creator attribution and limitations.
 
-## The ten simulations
-
-| # | Effect | What it is | Screenshot |
-|---|--------|------------|------------|
-| 1 | **Galaxy Spiral** | Differentially-rotating two-arm spiral with a core that "breathes", murmurs and feeds on inflowing gas | ![galaxy](docs/effect-galaxy.png) |
-| 2 | **Particle Explosion** | Radial burst with shockwave ring, sparks and smoke fall-off | |
-| 3 | **Black Hole** | Accretion disk, photon ring, relativistic jet and a dark event-horizon sphere | ![black hole](docs/effect-blackhole.png) |
-| 4 | **Liquid Cluster** | Cohesive metal-like droplet with rim glow and surface tension flow | |
-| 5 | **Magnetic Field** | Two-pole dipole with 3D field-line cages, orbiting charged grains and pole glow | |
-| 6 | **Smoke & Fire** | Rising ember plume: physical temperature ramp (white-hot → ash), grey volumetric smoke cap | ![smoke & fire](docs/effect-smokefire.png) |
-| 7 | **Nebula Drift** | Three layered cosmic clouds with palette-tinted inner glow, slow internal churn | |
-| 8 | **Wave Field** | A ripple tank: two orbiting coherent sources interfere; pointer wells act as driven wave sources; clicks splash the membrane | ![wave](docs/effect-wave.png) |
-| 9 | **Molecular Helix** | Spring-mass double helix — ball-and-stick atoms, backbone rails and rungs; click to knock it out of equilibrium | ![helix](docs/effect-dna.png) |
-| 10 | **Audio Reactive** | Bass/mids/treble FFT bands drive ring radius, particle energy and beat pulses (mic, audio file, or built-in demo signal) | |
-
-## Interacting
-
-- **Orbit** — drag to rotate, scroll to zoom, auto-gentle idle drift.
-- **Wells** — click/tap the stage: a gravitational well pulls (or, with repulsion held, pushes) particles. On the Wave Field, clicks splash the membrane.
-- **Control Deck** (right panel) — 10 simulation cards, 12 live sliders (particle count 500–16 000, size, speed, gravity, attraction, repulsion, turbulence, rotation, opacity, glow, bloom, trail), 6 gradient palettes, 3 quality presets.
-- **Quality** — the adaptive governor starts at full fidelity and steps down (pixel-ratio cap + particle budget) only when the rolling FPS floor is breached, then restores after ~6 good seconds (hysteresis — no oscillation). The rail shows `FULL` or `AUTO-1…3`. Manual override: **Performance / Balanced (default) / Ultra** radio group, capping device pixel ratio at 1.0 / 1.5 / 2.0.
-- **Audio** — *Demo signal* works out of the box; *Use Microphone* needs mic permission; *Load audio file* plays any local track. The Audio Reactive effect reads bass, mid and treble energy at 60 Hz.
-- **Space** pauses/resumes · **Esc** closes dialogs.
-- Preferences persist in `localStorage`; respects `prefers-reduced-motion` on first visit.
+## Not available / not validated
+- Full component anatomy, component selection, isolation, relationships, exploded animation, interior navigation: disabled, no verified component geometry.
+- Other catalogue models: coming soon, no reused car geometry.
+- Exact factory trim fidelity, production dates, market/model-year specifications: unverified and withheld.
+- Compression, adaptive FPS-based quality, HDRI locations, SSR, progressive LODs, performance budgets: not implemented. Current asset is 22.7 MB uncompressed. Quality selection changes resolution, not geometry complexity.
+- Production readiness and mid-range phone frame rate: not established. Headless SwiftShader checks are not device benchmarks.
+- Catalogue is not yet a validated historical database. Some entries represent selected generations rather than all possible trims/years. M635CSi is treated as the M6 E24 market-name alias; G83 Competition Convertible includes the M xDrive name alias, not a duplicate entry.
 
 ## Architecture
+- `src/showroom/catalogue.ts`: catalogue identities and strict one-asset mapping.
+- `src/showroom/viewer.ts`: GLTF loading, stale-request protection, normalization, lighting, controls, material updates and cleanup.
+- `src/showroom/main.ts`: working catalogue, configuration and availability UI.
+- `src/showroom/style.css`: responsive showroom layout.
+- `public/models/manifest.json`: provenance and feature availability.
+- `scripts/audit-model.mjs`: GLB header, resource and hash audit.
+- `docs/showroom/ASSETS.md`: asset license evidence, restrictions and acquisition gate.
+- Previous particle-lab sources/tests remain in the repository but are not loaded by the new entry point. Their tests must not be counted as showroom coverage.
 
-```
-src/
-├─ engine/          Core loop & renderer
-│  ├─ ParticleEngine.ts    Three.js renderer, ACES filmic tone mapping,
-│  │                       UnrealBloom, adaptive quality wiring, shockwaves
-│  ├─ ParticleSystem.ts    Flat Float32Array SoA buffers (positions, colors,
-│  │                       alphas, sizes) — zero per-frame allocation
-│  ├─ AdaptiveQuality.ts   Rolling-FPS quality governor with hysteresis
-│  ├─ CameraController.ts  Orbit + idle drift
-│  ├─ palettes.ts          6 multi-stop gradients → 256-entry LUTs
-│  └─ SimplexNoise.ts      3D curl noise for turbulence
-├─ effects/         10 simulations + catalog.ts (single source for the UI gallery)
-│  └─ effectUtils.ts       sdt(), colorFromLUT() shared helpers
-├─ audio/AudioEngine.ts    Web Audio FFT (analyser @ 60 Hz), mic/file/demo sources
-├─ state/SettingsStore.ts  Typed settings, clamped ranges, localStorage persistence
-├─ ui/                     ControlPanel, StatsRail (telemetry), Toast
-└─ shaders/                Point-sprite vertex/fragment, noise + shockwave passes
-```
+## GitHub Pages
+`.github/workflows/deploy.yml` installs dependencies, typechecks, runs tests, audits the GLB, builds, verifies output and uploads `dist` to Pages. Vite `base: './'` supports `/100-/`; public asset requests use `import.meta.env.BASE_URL`.
 
-**Simulation notes**
+**Deployment blocker:** Pages is currently configured for legacy main-root publishing. The connected GitHub integration returned HTTP 403 when changing Pages source. A repository administrator must select **Settings → Pages → Source → GitHub Actions**. The workflow must be on the default branch before workflow_dispatch is available; the earlier promise of dispatching an unpublished workflow from this branch was incorrect. No successful deployment is claimed. Once the changes are approved and merged and the setting is enabled, push-to-main deploys automatically. No paid service is required.
 
-- All motion runs on the CPU in flat typed arrays; rendering is a single draw call of additive-blended point sprites with per-particle color/alpha/size attributes.
-- Each effect implements `ParticleEffect` (`init` / `update`) against a shared `EffectContext` (time, params, palette LUT, pointer wells, shockwave spawner) — adding an 11th effect is one file plus one catalog entry.
-- Particle count is live-resizable (500–16 000) with no re-allocation of the GPU buffers; overflow grids (Wave Field) park excess particles invisibly.
-- Colors come from 256×3 gradient LUTs built per frame from the active palette — whole-scene re-tinting is one uniform-free attribute rewrite.
-
-## Testing & quality gates
-
-- **`npm test`** — 44 Vitest unit tests: math/LUT/RNG utils, settings sanitization & persistence, adaptive-quality hysteresis state machine, palette/catalog integrity.
-- **`npm run e2e`** — 41 checks in headless Chromium (SwiftShader): boot, WebGL2 context, all 10 effects render non-blank, slider wiring, palette/quality/pause/reset flows, mic (fake device) & demo audio fallback, performance floor, 390×844 mobile layout, rapid-switch + reload regression, zero console/page errors. Screenshots land in `e2e/screenshots/` (git-ignored; regenerate with `npm run e2e`).
-- Benchmarks and measurement methodology: [docs/PERFORMANCE.md](docs/PERFORMANCE.md).
-
-## Browser support
-
-Any modern browser with **WebGL2** (Chrome/Edge 90+, Firefox 98+, Safari 15.2+). Without WebGL2 the app fails gracefully with a clear on-screen error. Headless testing uses SwiftShader (software GL) — see PERFORMANCE.md for what that means for the numbers.
-
-## Repository history
-
-This repository previously hosted the **SyncBeat** prototype (a multi-device video/audio sync PoC). It has been removed from the tree; the final SyncBeat state remains reachable in git history (≤ `ee3ff00`).
-
-## License
-
-[MIT](package.json)
+This is an unofficial study, not affiliated with or endorsed by BMW AG. BMW names, designs and trademarks belong to their owners. See ASSETS.md before commercial redistribution.

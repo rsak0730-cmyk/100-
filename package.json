@@ -1,14 +1,15 @@
 {
-  "name": "aether-particle-lab",
+  "name": "m-atelier-showroom",
   "version": "1.0.0",
-  "description": "AETHER - Advanced interactive 3D particle effects web laboratory (Three.js + WebGL2)",
+  "description": "Independent BMW M catalogue and attributed interactive M4 exterior reference",
   "scripts": {
     "test": "vitest run",
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "e2e": "node e2e/run-e2e.mjs"
+    "e2e": "node e2e/showroom.mjs",
+    "audit:assets": "node scripts/audit-model.mjs"
   },
   "keywords": [],
   "author": "",
