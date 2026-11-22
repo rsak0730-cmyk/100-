@@ -1,3 +1,5 @@
+import modelAsset from "./model-asset.json";
+import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 import { downloadModel } from "./download";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
@@ -124,13 +126,13 @@ export class Viewer {
     try {
       const url = import.meta.env.BASE_URL + path;
       const bytes = await downloadModel(url, controller.signal, currentStatus,
-        path === "models/m4.glb" ? 22739084 : undefined);
+        path === modelAsset.path ? modelAsset.bytes : undefined);
       if (token !== this.token) return;
       currentStatus("DOWNLOAD COMPLETE · PREPARING 3D MODEL…");
       // Let the browser paint the preparation stage before parsing/texture decoding.
       await new Promise<void>(resolve => requestAnimationFrame(() => { setTimeout(resolve, 0); }));
       if (token !== this.token) return;
-      const gltf = await new GLTFLoader().parseAsync(bytes, new URL(".", new URL(url, location.href)).href);
+      const gltf = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).parseAsync(bytes, new URL(".", new URL(url, location.href)).href);
       if (token !== this.token) {
         gltf.scene.traverse((o) => {
           if (o instanceof THREE.Mesh) {

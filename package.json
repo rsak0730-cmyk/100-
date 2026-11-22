@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "e2e": "node e2e/showroom.mjs",
     "audit:assets": "node scripts/audit-model.mjs",
-    "publish:branch": "npm run build && node scripts/publish-branch.mjs"
+    "publish:branch": "npm run build && node scripts/publish-branch.mjs",
+    "optimize:model": "node scripts/optimize-model.mjs"
   },
   "keywords": [],
   "author": "",
@@ -20,8 +21,11 @@
     "three": "^0.187.0"
   },
   "devDependencies": {
+    "@gltf-transform/core": "^4.5.1",
+    "@gltf-transform/extensions": "^4.5.1",
     "@sparticuz/chromium": "^131.0.1",
     "@types/three": "^0.187.0",
+    "meshoptimizer": "^1.3.0",
     "playwright-core": "^1.49.1",
     "typescript": "~5.9",
     "vite": "^7.3.8",

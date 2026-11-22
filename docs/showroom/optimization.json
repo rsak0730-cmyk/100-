@@ -1,0 +1,12 @@
+{
+  "sourceBytes": 22739084,
+  "optimizedBytes": 15276684,
+  "reductionPercent": 32.8,
+  "filename": "m4-lossless-8a331001843a.glb",
+  "attributeValuesVerified": 4518344,
+  "textureBytesIdentical": true,
+  "materialsIdentical": true,
+  "nodeTransformsIdentical": true,
+  "triangleGeometryIdentical": true,
+  "method": "EXT_meshopt_compression without quantization or filters; no texture changes"
+}

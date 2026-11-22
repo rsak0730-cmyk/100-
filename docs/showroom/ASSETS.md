@@ -22,3 +22,7 @@ Search identified other Sketchfab G82 models, but no authenticated download or c
 Record author, original source, exact license, redistribution rights, intended model/trim/year/market and file hash. Validate GLB resources and mesh hierarchy. Inspect front/rear/roof/interior views against primary references; establish units/orientation and material masks. Verify component geometry and relationships individually before enabling selection, isolation or assembly. Benchmark mobile memory/frame time, then optimize geometry/textures with license-compliant transformations. Never assign one asset to multiple model identities.
 
 Procedural RoomEnvironment lighting is from the installed Three.js package (MIT). There is no HDRI, Draco or KTX2 claim in this implementation.
+
+
+## Lossless delivery variant
+The viewer now requests a content-hashed `m4-lossless-*.glb`, produced by `scripts/optimize-model.mjs`. EXT_meshopt_compression is applied without any quantize, simplify or texture transform. The verification report records exact attribute comparisons, identical texture bytes, material definitions and node transforms, and triangle equivalence (allowing cyclic vertex-order rotation without winding change). Source attribution and license remain unchanged. Meshoptimizer and the Three.js decoder are MIT-licensed. The source GLB remains preserved; runtime does not download it. Browser cache storage is optional.

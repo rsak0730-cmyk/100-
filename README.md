@@ -29,7 +29,7 @@ The E2E command requires the preview server already running on 4173. It uses pac
 - Full component anatomy, component selection, isolation, relationships, exploded animation, interior navigation: disabled, no verified component geometry.
 - Other catalogue models: coming soon, no reused car geometry.
 - Exact factory trim fidelity, production dates, market/model-year specifications: unverified and withheld.
-- Compression, adaptive FPS-based quality, HDRI locations, SSR, progressive LODs, performance budgets: not implemented. Current asset is 22.7 MB uncompressed. Quality selection changes resolution, not geometry complexity.
+- Adaptive FPS-based quality, HDRI locations, SSR, progressive LODs and performance budgets: not implemented. Source asset is 22.74 MB; the served lossless Meshopt variant is 15.28 MB (32.8% smaller), with unchanged texture bytes and verified exact geometry data. Quality selection changes resolution, not geometry complexity.
 - Production readiness and mid-range phone frame rate: not established. Headless SwiftShader checks are not device benchmarks.
 - Catalogue is not yet a validated historical database. Some entries represent selected generations rather than all possible trims/years. M635CSi is treated as the M6 E24 market-name alias; G83 Competition Convertible includes the M xDrive name alias, not a duplicate entry.
 
@@ -53,3 +53,11 @@ After source changes, run `npm run publish:branch`, commit the generated root fi
 The existing Actions workflow is an alternative for a future switch to Actions-based publishing; it is not required for the current branch-root deployment.
 
 This is an unofficial study, not affiliated with or endorsed by BMW AG. BMW names, designs and trademarks belong to their owners. See ASSETS.md before commercial redistribution.
+
+
+## Lossless loading optimization
+`npm run optimize:model` creates the hash-versioned Meshopt variant from the untouched source GLB, updates the asset manifest/preload reference, and verifies decoded attribute values, triangle geometry, texture bytes, materials and node transforms. No simplification, quantization, texture resizing or lossy filtering is used. See `docs/showroom/optimization.json`.
+
+The loader uses the self-contained Three.js Meshopt decoder. No user installation, external decoder CDN or paid API is needed. A preload starts the model fetch earlier; optional Cache Storage reuses the validated hash-versioned file across visits. Cache failure/private browsing falls back to ordinary fetching. Browser eviction or clearing site data causes another download. Changing model content creates a new filename to avoid stale assets. The original model remains in the repository for reproducibility but is not requested by the viewer.
+
+A smaller transfer is measured, not a promise of a particular load time: parsing, textures and GPU preparation still depend on the device. No throttled-network or real-phone benchmark is claimed.

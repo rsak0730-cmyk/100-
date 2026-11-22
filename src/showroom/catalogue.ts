@@ -1,3 +1,4 @@
+import modelAsset from "./model-asset.json";
 export interface Vehicle {
   id: string;
   name: string;
@@ -150,6 +151,6 @@ export const vehicles: Vehicle[] = groups.flatMap(
             : name.includes("Gran Coupe")
               ? "Gran Coupe"
               : body,
-      model: name === "M4 Competition G82" ? "models/m4.glb" : null,
+      model: name === "M4 Competition G82" ? modelAsset.path : null,
     })),
 );
