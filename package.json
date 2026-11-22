@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "e2e": "node e2e/showroom.mjs",
-    "audit:assets": "node scripts/audit-model.mjs"
+    "audit:assets": "node scripts/audit-model.mjs",
+    "publish:branch": "npm run build && node scripts/publish-branch.mjs"
   },
   "keywords": [],
   "author": "",

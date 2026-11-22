@@ -46,6 +46,10 @@ The E2E command requires the preview server already running on 4173. It uses pac
 ## GitHub Pages
 `.github/workflows/deploy.yml` installs dependencies, typechecks, runs tests, audits the GLB, builds, verifies output and uploads `dist` to Pages. Vite `base: './'` supports `/100-/`; public asset requests use `import.meta.env.BASE_URL`.
 
-**Deployment blocker:** Pages is currently configured for legacy main-root publishing. The connected GitHub integration returned HTTP 403 when changing Pages source. A repository administrator must select **Settings → Pages → Source → GitHub Actions**. The workflow must be on the default branch before workflow_dispatch is available; the earlier promise of dispatching an unpublished workflow from this branch was incorrect. No successful deployment is claimed. Once the changes are approved and merged and the setting is enabled, push-to-main deploys automatically. No paid service is required.
+**Current branch deployment:** Pages now publishes `arena/d00425a0-100` at `/` using legacy branch publishing. The tracked root `index.html`, `assets/`, `models/` and `.nojekyll` are the production website. Editable Vite HTML lives in `app/index.html`; application source remains in `src/showroom/`.
+
+After source changes, run `npm run publish:branch`, commit the generated root files along with the source, and push this branch. GitHub's branch Pages build then publishes without requiring a merge or manual workflow dispatch. Do not edit the generated root HTML directly. The model is intentionally copied into the published root because legacy Pages cannot use Vite's `public/` mapping.
+
+The existing Actions workflow is an alternative for a future switch to Actions-based publishing; it is not required for the current branch-root deployment.
 
 This is an unofficial study, not affiliated with or endorsed by BMW AG. BMW names, designs and trademarks belong to their owners. See ASSETS.md before commercial redistribution.
