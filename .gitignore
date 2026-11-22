@@ -21,3 +21,5 @@ e2e/showroom-report.json
 
 # Flagship QA report
 e2e/flagship-report.json
+
+e2e/additional-cars-report.json

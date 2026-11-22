@@ -10,6 +10,6 @@ export const cameraViews: Record<
   Lounge: { position: [5.5, 2.3, -3], target: [10, 0.9, -9] },
   Ceiling: { position: [3, 2.1, 5], target: [0, 6, -2] },
   Cinematic: { position: [-7, 1.5, 6], target: [0, 0.8, 0] },
-  "West Island": { position: [-11, 2.5, 8], target: [-8, 0.5, 3] },
-  "East Island": { position: [11, 2.5, 8], target: [8, 0.5, 3] },
+  "West Island": { position: [-12, 3.5, 10], target: [-8, 0.5, 3] },
+  "East Island": { position: [13, 3.5, 10], target: [8, 0.5, 3] },
 };

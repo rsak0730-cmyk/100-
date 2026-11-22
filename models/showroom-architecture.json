@@ -2,10 +2,39 @@
   "id": "atelier-motor-house",
   "kind": "original procedural 3D architecture",
   "source": "src/showroom/architecture.ts",
-  "dimensionsMetres": {"width":36,"depth":28,"clearHeight":7.5},
-  "zones": ["Central presentation stage", "West reserved display island", "East reserved display island", "Walnut reception", "Customer lounge", "Glass entrance", "Outdoor arrival courtyard"],
-  "materials": ["Procedural stone with bump map", "Procedural walnut with grain and bump map", "Procedural woven upholstery", "Leather approximation", "Brass", "Brushed-metal approximation", "Architectural glass approximation", "Painted wall", "Opal light diffuser"],
+  "dimensionsMetres": {
+    "width": 36,
+    "depth": 28,
+    "clearHeight": 7.5
+  },
+  "zones": [
+    "Central presentation stage",
+    "West vehicle display island",
+    "East vehicle display island",
+    "Walnut reception",
+    "Customer lounge",
+    "Glass entrance",
+    "Outdoor arrival courtyard"
+  ],
+  "materials": [
+    "Procedural stone with bump map",
+    "Procedural walnut with grain and bump map",
+    "Procedural woven upholstery",
+    "Leather approximation",
+    "Brass",
+    "Brushed-metal approximation",
+    "Architectural glass approximation",
+    "Painted wall",
+    "Opal light diffuser"
+  ],
   "thirdPartyEnvironmentTextures": [],
-  "assetRequirements": "No additional download: geometry and material maps generated in the browser. The only vehicle is separately licensed in manifest.json.",
-  "limitations": ["Procedural visualization, not a scanned photoreal environment", "Environment-map reflections, not car-reflecting SSR or ray tracing", "Decorative doors are not animated", "Simple courtyard/building geometry, not a photogrammetric exterior", "Orbit/preset exploration, not a collision-aware walking simulator", "Secondary islands unoccupied because no additional licensed cars have been acquired", "Only the main presentation spotlight casts dynamic shadows"]
+  "assetRequirements": "Procedural room; three separately attributed exterior GLBs are listed in manifest.json.",
+  "limitations": [
+    "Procedural visualization, not a scanned photoreal environment",
+    "Environment-map reflections, not car-reflecting SSR or ray tracing",
+    "Decorative doors are not animated",
+    "Simple courtyard/building geometry, not a photogrammetric exterior",
+    "Orbit/preset exploration, not a collision-aware walking simulator",
+    "Only the main presentation spotlight casts dynamic shadows"
+  ]
 }

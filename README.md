@@ -18,7 +18,7 @@ npm run e2e
 The browser suite uses packaged Chromium with SwiftShader software WebGL. It extracts bundled Chromium shared libraries under `/tmp`. Screenshots/reports in `e2e/` are generated and ignored. Visitors need only a compatible browser; no installation, paid API or subscription.
 
 ## Current experience
-- Central M4 exterior reference on a premium platform; two reserved presentation islands.
+- Three distinct free licensed exterior models: M4 Competition on the central platform, M5 F10 (2013) on the west island and M4 CSL G82 (2023) on the east island.
 - 36 × 28 m procedural gallery: stone floor/joints, coffered ceiling/beams/columns, glass entrance and handles, walnut/fluted reception, customer lounge, furniture, shelves, stands, material artwork, planters and exterior arrival court.
 - Locally generated stone, wood and fabric maps; PBR metal/glass/leather approximations. No flat photo replaces the environment.
 - Master lighting, six light groups with independent brightness, colour temperature, custom light/accent colours, ambient/directional contributions, reflections/environment brightness, exposure, shadows and shadow strength.
@@ -58,8 +58,12 @@ npm run publish:branch
 ## Assets and honest limitations
 The M4 is “BMW M4 Competition M Package” by 𝙎𝙍𝙏 𝙋𝙚𝙧𝙛𝙤𝙢𝙖𝙣𝙘𝙚™, distributed via [coopercodes/bmwGLB](https://github.com/coopercodes/bmwGLB), license stated as [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Attribution and changes are visible in the app. See `docs/showroom/ASSETS.md`. BMW design/trademark rights and exact factory fidelity are not independently cleared. This is unofficial and not affiliated with BMW AG.
 
-There is **one acquired car**, not a multi-car collection. Secondary islands are intentionally unoccupied, with honest information stands. No vehicle anatomy or new catalogue acquisition is claimed.
+There are **three acquired cars**, not the complete historical collection. New free additions and their source/license evidence, adaptations and tests are documented in `docs/free-models/README.md`. Unavailable cars are not represented by reused geometry. No vehicle anatomy is claimed.
 
 The room is original procedural architecture/furniture, not scanned photorealism. Floor/glass reflections are environment-based, **not** car-reflecting SSR, planar mirrors or ray tracing. Only the presentation spotlight casts dynamic shadows. No architectural walking collision system, opening doors, baked GI, HDRI location, KTX2 texture delivery or physical photometric calibration is implemented. These boundaries mean the full ultra-photoreal flagship quality target is not claimed as complete.
 
 No physical mobile-device validation, stable FPS guarantee or GPU-memory budget has been established. Current QA uses browser emulation/software WebGL; exact scope is in `docs/flagship/QA.md`.
+
+
+## Free collection additions
+`src/showroom/additional-vehicles.ts` registers the two additional third-party cars and their sources. They are loaded after the central model and share the lighting rig. Open **Explore → Available cars** to focus each island; select a car by clicking its mesh or choosing it in the object selector. Their creators and CC BY 4.0 terms are visible in Credits. `node scripts/audit-additional.mjs` verifies their file structure/hashes.

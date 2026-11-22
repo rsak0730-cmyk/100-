@@ -320,7 +320,7 @@ export function buildArchitecture(): Architecture {
         : `${id === "west" ? "West" : "East"} display island`,
       id === "central"
         ? "The licensed M4 exterior reference is the focal exhibit."
-        : "Reserved presentation space. No additional licensed vehicle is represented here.",
+        : "Presentation space for a separately licensed vehicle. Check the Explore panel for model loading status.",
       "Satin graphite / illuminated bronze edge",
       [x, 0.15, z],
     );
@@ -343,7 +343,11 @@ export function buildArchitecture(): Architecture {
       0.035,
     );
     sign(
-      id === "central" ? "M4 / EXTERIOR STUDY" : "GALLERY / RESERVED",
+      id === "central"
+        ? "M4 COMPETITION / G82"
+        : id === "west"
+          ? "BMW M5 / F10"
+          : "BMW M4 CSL / G82",
       0.68,
       0.28,
       x + r + 0.35,

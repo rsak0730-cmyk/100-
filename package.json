@@ -9,10 +9,11 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "e2e": "node e2e/flagship.mjs",
-    "audit:assets": "node scripts/audit-model.mjs",
+    "audit:assets": "node scripts/audit-model.mjs && node scripts/audit-additional.mjs",
     "publish:branch": "npm run build && node scripts/publish-branch.mjs",
     "optimize:model": "node scripts/optimize-model.mjs",
-    "verify:build": "node scripts/verify-build.mjs"
+    "verify:build": "node scripts/verify-build.mjs",
+    "e2e:cars": "node e2e/additional-cars.mjs"
   },
   "keywords": [],
   "author": "",

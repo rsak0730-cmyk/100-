@@ -1,3 +1,4 @@
+import { additionalVehicles } from "./additional-vehicles";
 import { Vector3 } from "three";
 import "./flagship.css";
 import { Viewer } from "./viewer";
@@ -67,7 +68,7 @@ app.innerHTML = `<a class="skip" href="#viewport">Skip to showroom</a>
     "",
   )}</details><details><summary>Fine adjustments</summary>${range("ambient", "Ambient fill", 0, 1, 0.05)}${range("directional", "Directional light", 0, 2, 0.05)}${range("reflections", "Material reflections", 0, 1.5, 0.05)}${range("environmentBrightness", "Environment lighting", 0, 2, 0.05)}${range("exposure", "Camera exposure", 0.3, 2, 0.05)}${toggle("shadows", "Presentation shadows")}${range("shadowIntensity", "Shadow strength", 0, 1, 0.05)}</details><button id="reset-lights" class="text-action">↺ Restore signature lighting</button></section>
 <section id="panel-environment" class="tool-panel" role="tabpanel" aria-labelledby="tab-environment" hidden><div class="section-title"><small>BEYOND THE GLASS</small><h2>A change of scene.</h2><p>Watch the arrival courtyard respond to the time of day.</p></div><label class="select-label" for="light-timeOfDay">Time of day<select id="light-timeOfDay">${["Daytime", "Evening", "Night", "Sunset"].map((t) => `<option>${t}</option>`).join("")}</select></label><div class="time-pills">${["Daytime", "Evening", "Night", "Sunset"].map((t) => `<button data-time="${t}">${t}</button>`).join("")}</div>${range("outdoorBrightness", "Outdoor brightness", 0, 2, 0.05)}${range("windowReflection", "Window reflections", 0, 1, 0.05)}<p class="note">Time changes the outdoor sky, directional light colour and its elevation—not an overlay. Interior fill and environment reflections can be balanced in Lighting.</p>${toggle("room", "Show architecture")}<button id="courtyard-view" class="outline-action">View the entrance glazing</button></section>
-<section id="panel-explore" class="tool-panel" role="tabpanel" aria-labelledby="tab-explore" hidden><div class="section-title"><small>A PLACE TO DISCOVER</small><h2>Take a closer look.</h2><p>Move between the gallery’s spaces, or select objects directly in 3D.</p></div><div class="camera-grid">${Object.keys(
+<section id="panel-explore" class="tool-panel" role="tabpanel" aria-labelledby="tab-explore" hidden><div class="section-title"><small>A PLACE TO DISCOVER</small><h2>Take a closer look.</h2><p>Move between the gallery’s spaces, or select objects directly in 3D.</p></div><div class="available-cars"><h3>Available cars</h3><button data-camera="Central Vehicle">M4 Competition · G82 <small>Centre stage</small></button>${additionalVehicles.map((v) => `<button data-camera="${v.camera}">${v.name} · ${v.generation}<small id="status-${v.id}" role="status">Waiting to load</small></button>`).join("")}</div><div class="camera-grid">${Object.keys(
   cameraViews,
 )
   .map(
@@ -76,11 +77,11 @@ app.innerHTML = `<a class="skip" href="#viewport">Skip to showroom</a>
   )
   .join(
     "",
-  )}</div><label class="select-label" for="object-select">Inspect an object<select id="object-select"><option value="">Choose a showroom object</option></select></label><article id="object-info" hidden aria-live="polite"><small id="object-kind">SELECTED OBJECT</small><h3 id="object-name"></h3><p id="object-description"></p><dl><dt>Material</dt><dd id="object-material"></dd></dl><div class="object-actions"><button id="focus-object">Focus object</button><button id="object-light" hidden>Adjust light</button><button id="clear-object">Clear selection</button></div></article><p class="note">Secondary islands are reserved display spaces. Only the licensed M4 reference is represented; other vehicles have not been duplicated into the room.</p></section>
+  )}</div><label class="select-label" for="object-select">Inspect an object<select id="object-select"><option value="">Choose a showroom object</option></select></label><article id="object-info" hidden aria-live="polite"><small id="object-kind">SELECTED OBJECT</small><h3 id="object-name"></h3><p id="object-description"></p><dl><dt>Material</dt><dd id="object-material"></dd></dl><div class="object-actions"><button id="focus-object">Focus object</button><button id="object-light" hidden>Adjust light</button><button id="clear-object">Clear selection</button></div></article><p class="note">Three distinct third-party assets are displayed: M4 Competition on centre stage, M5 F10 on the west island, and M4 CSL on the east island.</p></section>
 <section id="panel-settings" class="tool-panel" role="tabpanel" aria-labelledby="tab-settings" hidden><div class="section-title"><small>THE EXPERIENCE</small><h2>Make it yours.</h2></div><label class="select-label" for="quality">Render quality<select id="quality"><option>Auto</option><option>Low</option><option>Medium</option><option>Ultra</option></select></label><p class="note">Auto reduces resolution after sustained slow rendering. Geometry and texture detail are unchanged.</p><label class="toggle"><span>Vehicle turntable</span><input id="rotate" type="checkbox" role="switch"/></label><label class="toggle"><span>Show performance readout</span><input id="show-stats" type="checkbox" role="switch"/></label><div id="performance" hidden aria-live="off"><span id="fps">Idle</span><span id="render-stats"></span></div><button id="reset-view" class="outline-action">Reset camera</button><button id="credits-button" class="text-action">Asset credits & transparency</button><p class="note">An independent showroom study, not affiliated with BMW AG. Room architecture and material maps are generated locally. No user installation or paid API is required.</p></section>
 <div class="panel-footer"><span class="status-dot"></span> Real-time architecture <span id="quality-badge">Auto</span></div></aside></main>
 <footer class="experience-bar"><div class="camera-shortcuts"><button data-camera="Entrance">Entrance</button><button data-camera="Central Vehicle" class="is-active">Centre stage</button><button data-camera="Wide Architecture">Architecture</button><button data-camera="Lounge">Lounge</button></div><div class="bar-actions"><button id="lighting-shortcut" aria-label="Open lighting controls">${icon("sun")} <span>Lighting</span></button><button id="reset-bottom" aria-label="Reset camera">${icon("reset")} <span>Reset</span></button><button class="full" aria-label="Enter fullscreen">${icon("full")} <span>Fullscreen</span></button></div><span class="bar-note">Designed to be explored.</span></footer>
-<dialog id="credits"><button id="close-credits" aria-label="Close credits">×</button><small>PROVENANCE & LIMITATIONS</small><h2>A space built with honesty.</h2><p>“BMW M4 Competition M Package” by 𝙎𝙍𝙏 𝙋𝙚𝙧𝙛𝙤𝙢𝙖𝙣𝙘𝙚™, distributed via coopercodes/bmwGLB under CC BY 4.0. Geometry was normalized and losslessly compressed; optional paint edits modify materials. Factory dimensions and trim fidelity are unverified.</p><p><a href="https://github.com/coopercodes/bmwGLB">Asset source</a> · <a href="https://sketchfab.com/3d-models/bmw-m4-competition-m-package-5c0a2dafb1ad408d9fc9eeef9aee531b">Creator page</a> · <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></p><p>Architecture, furniture, courtyard, art and surface maps are procedural original work. Lighting uses Three.js (MIT) and its procedural RoomEnvironment. There is no photographic environment, HDRI location, SSR or claim of physically exact architectural simulation. Empty islands are intentional, not hidden vehicle assets.</p><p>No real-phone hardware benchmark is claimed. Browser emulation and software WebGL are used for automated QA.</p></dialog>`;
+<dialog id="credits"><button id="close-credits" aria-label="Close credits">×</button><small>PROVENANCE & LIMITATIONS</small><h2>A space built with honesty.</h2><p>“BMW M4 Competition M Package” by 𝙎𝙍𝙏 𝙋𝙚𝙧𝙛𝙤𝙢𝙖𝙣𝙘𝙚™, distributed via coopercodes/bmwGLB under CC BY 4.0. Geometry was normalized and losslessly compressed; optional paint edits modify materials. Factory dimensions and trim fidelity are unverified.</p><p><a href="https://github.com/coopercodes/bmwGLB">Asset source</a> · <a href="https://sketchfab.com/3d-models/bmw-m4-competition-m-package-5c0a2dafb1ad408d9fc9eeef9aee531b">Creator page</a> · <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></p><p>Architecture, furniture, courtyard, art and surface maps are procedural original work. Lighting uses Three.js (MIT) and its procedural RoomEnvironment. There is no photographic environment, HDRI location, SSR or claim of physically exact architectural simulation. The additional free models have separate creators and source licenses listed below.</p>${additionalVehicles.map((v) => `<p><b>${v.name} ${v.generation} (${v.year})</b> by ${v.author} — <a href="${v.source}">Original source</a>, <a href="${v.distribution}">Distributor</a>, CC BY 4.0. Runtime scale/orientation normalization applied.${v.id === "m4-csl-g82" ? " Distributor variant is Meshopt-compressed with 2K textures; unused geometry and a documented floating splitter artifact are removed at runtime." : ""}</p>`).join("")}<p>No real-phone hardware benchmark is claimed. Browser emulation and software WebGL are used for automated QA.</p></dialog>`;
 const $ = <T extends HTMLElement = HTMLElement>(selector: string) =>
   document.querySelector<T>(selector)!;
 let viewer: Viewer | undefined,
@@ -173,7 +174,19 @@ try {
       `${stats.drawCalls} draw calls · ${(stats.triangles / 1000).toFixed(0)}k triangles · ${stats.geometries} geometries · ${stats.textures} textures`;
     $("#quality-badge").textContent = stats.quality;
   };
-  void viewer.load(modelAsset.path);
+  viewer.onAdditionalStatus = (id, status) => {
+    const el = document.querySelector(`#status-${id}`);
+    if (el) el.textContent = status;
+  };
+  viewer.onAdditionalReady = (item) => {
+    const opt = document.createElement("option");
+    opt.value = item.id;
+    opt.textContent = item.name;
+    $<HTMLSelectElement>("#object-select").append(opt);
+  };
+  void viewer
+    .load(modelAsset.path)
+    .then(() => viewer?.loadAdditionalVehicles());
   sync();
 } catch (error) {
   $("#webgl-fallback").hidden = false;
@@ -276,6 +289,22 @@ $("#show-stats").onchange = (e) =>
   ($("#performance").hidden = !(e.target as HTMLInputElement).checked);
 
 function updateLocation(name: string) {
+  const display = additionalVehicles.find((v) => v.camera === name);
+  if (display) {
+    $(".scene-heading").classList.add("compact");
+    $(".scene-heading h1").textContent =
+      display.name + " " + display.generation;
+    $(".scene-heading p").textContent =
+      `${display.year} · Free CC BY 4.0 exterior model`;
+    $(".vehicle-caption small").textContent =
+      "ON THE " + (display.id === "m5-f10" ? "WEST" : "EAST") + " ISLAND";
+    $(".vehicle-caption h2").textContent =
+      display.name + " " + display.generation;
+    $(".vehicle-caption p").textContent =
+      "Third-party exterior · Exact factory fidelity unverified";
+    return;
+  }
+
   const central = name === "Central Vehicle";
   $(".scene-heading").classList.toggle("compact", !central);
   if (central)

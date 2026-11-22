@@ -1,0 +1,33 @@
+[
+  {
+    "id": "m5-f10",
+    "file": "m5-f10-2013.glb",
+    "bytes": 1062736,
+    "sha256": "5b33f79f0ae75c0c26969145c79271932d472a4d902e82a9dbc864313459cfb4",
+    "nodes": 70,
+    "meshes": 33,
+    "extensions": [
+      "KHR_materials_clearcoat",
+      "KHR_materials_emissive_strength"
+    ],
+    "embeddedResources": true,
+    "license": "CC-BY-4.0 (as stated by distributor)",
+    "factoryAccuracyVerified": false
+  },
+  {
+    "id": "m4-csl-g82",
+    "file": "m4-csl-2023.glb",
+    "bytes": 3502516,
+    "sha256": "4b51e7f323f4128059bed80ed96805a7d986f4275dd032ed9f38fbce66af9395",
+    "nodes": 357,
+    "meshes": 220,
+    "extensions": [
+      "EXT_meshopt_compression",
+      "KHR_materials_specular",
+      "KHR_mesh_quantization"
+    ],
+    "embeddedResources": true,
+    "license": "CC-BY-4.0 (as stated by distributor)",
+    "factoryAccuracyVerified": false
+  }
+]

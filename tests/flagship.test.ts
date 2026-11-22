@@ -40,7 +40,7 @@ describe("flagship architecture configuration", () => {
   });
   it("keeps secondary platforms honestly reserved", () => {
     expect(architectureSource).toContain(
-      "Reserved presentation space. No additional licensed vehicle",
+      "Presentation space for a separately licensed vehicle",
     );
     expect(architectureSource).toContain(
       "Batch non-interactive opaque architecture",
