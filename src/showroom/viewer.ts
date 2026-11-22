@@ -1,3 +1,4 @@
+import { downloadModel } from "./download";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
@@ -12,6 +13,8 @@ export class Viewer {
   original = new Map<THREE.Material, THREE.Color>();
   auto = false;
   token = 0;
+  request: AbortController | null = null;
+  loadTimer: ReturnType<typeof setTimeout> | undefined;
   floor: THREE.Mesh;
   disposed = false;
   constructor(
@@ -78,6 +81,8 @@ export class Viewer {
     });
   }
   clear() {
+    this.request?.abort();
+    clearTimeout(this.loadTimer);
     this.token++;
     if (this.car) {
       this.scene.remove(this.car);
@@ -106,17 +111,26 @@ export class Viewer {
       return;
     }
     const token = this.token;
-    this.status("LOADING 3D ASSET");
+    const controller = new AbortController();
+    this.request = controller;
+    const currentStatus = (label: string) => { if (token === this.token) this.status(label); };
+    this.status("DOWNLOADING MODEL · 0%");
+    this.loadTimer = setTimeout(() => {
+      if (token !== this.token) return;
+      this.token++;
+      controller.abort();
+      this.status("MODEL LOAD TIMED OUT · CHECK YOUR CONNECTION AND RETRY");
+    }, 120_000);
     try {
-      const gltf = await new GLTFLoader().loadAsync(
-        import.meta.env.BASE_URL + path,
-        (p) =>
-          this.status(
-            p.total
-              ? `LOADING ${Math.round((p.loaded / p.total) * 100)}%`
-              : "LOADING 3D ASSET",
-          ),
-      );
+      const url = import.meta.env.BASE_URL + path;
+      const bytes = await downloadModel(url, controller.signal, currentStatus,
+        path === "models/m4.glb" ? 22739084 : undefined);
+      if (token !== this.token) return;
+      currentStatus("DOWNLOAD COMPLETE · PREPARING 3D MODEL…");
+      // Let the browser paint the preparation stage before parsing/texture decoding.
+      await new Promise<void>(resolve => requestAnimationFrame(() => { setTimeout(resolve, 0); }));
+      if (token !== this.token) return;
+      const gltf = await new GLTFLoader().parseAsync(bytes, new URL(".", new URL(url, location.href)).href);
       if (token !== this.token) {
         gltf.scene.traverse((o) => {
           if (o instanceof THREE.Mesh) {
@@ -153,10 +167,13 @@ export class Viewer {
       });
       this.car = car;
       this.scene.add(car);
+      clearTimeout(this.loadTimer);
       this.status("");
     } catch {
-      if (token === this.token)
-        this.status("MODEL LOAD FAILED · RETRY FROM CATALOGUE");
+      if (token === this.token) {
+        clearTimeout(this.loadTimer);
+        this.status("MODEL LOAD FAILED · CHECK YOUR CONNECTION AND RETRY");
+      }
     }
   }
   reset() {

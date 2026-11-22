@@ -719,3 +719,5 @@ button.active {
     scroll-behavior: auto !important;
   }
 }
+#retry-model {position:absolute;top:66%;left:50%;transform:translateX(-50%);padding:14px 20px;border:1px solid #a0d6dd;border-radius:6px;background:#17242e;color:#cdf9ff;font-size:12px;z-index:3}
+#retry-model[hidden]{display:none}
