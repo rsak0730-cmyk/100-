@@ -719,5 +719,127 @@ button.active {
     scroll-behavior: auto !important;
   }
 }
-#retry-model {position:absolute;top:66%;left:50%;transform:translateX(-50%);padding:14px 20px;border:1px solid #a0d6dd;border-radius:6px;background:#17242e;color:#cdf9ff;font-size:12px;z-index:3}
-#retry-model[hidden]{display:none}
+#retry-model {
+  position: absolute;
+  top: 66%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 14px 20px;
+  border: 1px solid #a0d6dd;
+  border-radius: 6px;
+  background: #17242e;
+  color: #cdf9ff;
+  font-size: 12px;
+  z-index: 3;
+}
+#retry-model[hidden] {
+  display: none;
+}
+.tabs {
+  gap: 16px;
+  justify-content: space-between;
+}
+.tabs button {
+  margin-right: 0;
+}
+.light-title h3 {
+  margin-top: 0;
+}
+.switch-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #d5eef1;
+  margin: 15px 0;
+}
+.light-field {
+  color: #a8bfc9;
+  font-size: 11px;
+  display: block;
+  margin: 20px 0;
+}
+.light-field select {
+  margin-top: 10px;
+}
+.light-field output {
+  float: right;
+  color: #d0edf2;
+  font-variant-numeric: tabular-nums;
+}
+.light-field input[type="range"] {
+  display: block;
+  width: 100%;
+  margin: 12px 0;
+  accent-color: #a7e7ed;
+  cursor: pointer;
+}
+.light-colours {
+  display: flex;
+  gap: 35px;
+}
+.light-colours label {
+  font-size: 10px;
+  color: #9bb7c6;
+}
+.light-colours input {
+  display: block;
+  width: 65px;
+  height: 32px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+.light-banks {
+  display: grid;
+  gap: 12px;
+  margin: 25px 0;
+}
+.light-banks label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #bbced6;
+  font-size: 11px;
+  margin: 0;
+}
+input[type="checkbox"] {
+  accent-color: #9fe2e8;
+  width: 17px;
+  height: 17px;
+  cursor: pointer;
+}
+#reset-lights {
+  padding: 11px 14px;
+  border: 1px solid #ffffff25;
+  border-radius: 5px;
+  font-size: 11px;
+  width: 100%;
+}
+.stage-footer {
+  flex-wrap: wrap;
+}
+#open-lights {
+  color: #b9eaf0;
+  border: 1px solid #97d9e335;
+  padding: 8px;
+  border-radius: 4px;
+}
+@media (max-width: 700px) {
+  .stage-footer {
+    gap: 9px;
+  }
+  .stage-footer > span:first-child {
+    flex-basis: 100%;
+  }
+  .mode {
+    bottom: 110px;
+  }
+}
+@media (min-width: 701px) {
+  aside {
+    max-height: max(680px, calc(100svh - 162px));
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #38535e transparent;
+  }
+}

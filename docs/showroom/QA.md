@@ -21,3 +21,12 @@
 - All 11 existing Chromium assertions passed with the Meshopt variant and bundled decoder, with no captured browser errors. Includes loading after vehicle switches.
 - Caching hit, unavailable storage and corrupt-cache fallback are unit-tested; cross-session physical-device caching is not measured.
 - No claim of a specific first-load time, frame rate improvement or real-phone validation.
+
+
+## Showroom and no-timeout update
+- Removed the model-loading timer and its timeout message. Kept explicit request cancellation for vehicle switches and actual failure handling.
+- Production/TypeScript build and 60 unit tests passed, including four lighting/deadline regression tests.
+- 17 Chromium browser assertions passed, including a screenshot-buffer difference between lights on and off, master switch state, preset colour, brightness output and bank/brightness reset. Existing model loading, catalogue, mobile overflow and console checks remained passing.
+- Desktop Lights screenshot and mobile screenshot inspected. The desktop side panel scrolls to reveal additional banks/reset controls.
+- An initial continuous-render software-WebGL screenshot timed out; on-demand rendering and cached shadow maps corrected this. Test screenshot allowance was also increased for the software renderer. This is not a hardware performance benchmark.
+- No real Android/iPhone testing; no promise that external browser/network connections cannot time out.

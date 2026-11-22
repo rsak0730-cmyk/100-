@@ -1,3 +1,4 @@
+import { ShowroomLighting } from "./lighting";
 import modelAsset from "./model-asset.json";
 import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 import { downloadModel } from "./download";
@@ -16,9 +17,10 @@ export class Viewer {
   auto = false;
   token = 0;
   request: AbortController | null = null;
-  loadTimer: ReturnType<typeof setTimeout> | undefined;
+  lighting: ShowroomLighting;
   floor: THREE.Mesh;
   disposed = false;
+  dirty = true;
   constructor(
     public host: HTMLElement,
     public status: (s: string) => void,
@@ -32,8 +34,11 @@ export class Viewer {
     this.camera.position.set(7, 3, 7);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
+    this.controls.addEventListener("change", () => {
+      this.dirty = true;
+    });
     this.controls.minDistance = 3;
-    this.controls.maxDistance = 14;
+    this.controls.maxDistance = 12;
     this.controls.maxPolarAngle = Math.PI / 2 - 0.015;
     this.controls.target.set(0, 0.8, 0);
     const pmrem = new THREE.PMREMGenerator(this.renderer);
@@ -41,10 +46,6 @@ export class Viewer {
     this.scene.environment = pmrem.fromScene(room, 0.04).texture;
     room.dispose();
     pmrem.dispose();
-    this.scene.add(new THREE.HemisphereLight(0xdff5ff, 0x22252b, 2));
-    const key = new THREE.DirectionalLight(0xffffff, 4);
-    key.position.set(3, 6, 4);
-    this.scene.add(key);
     this.floor = new THREE.Mesh(
       new THREE.CircleGeometry(30, 96),
       new THREE.MeshStandardMaterial({
@@ -55,7 +56,8 @@ export class Viewer {
       }),
     );
     this.floor.rotation.x = -Math.PI / 2;
-    this.floor.position.y = -0.025;
+    this.floor.position.y = -0.23;
+    this.floor.receiveShadow = true;
     this.scene.add(this.floor);
     this.scene.fog = new THREE.Fog(0x0b1016, 10, 34);
     const ring = new THREE.Mesh(
@@ -70,22 +72,34 @@ export class Viewer {
     ring.rotation.x = -Math.PI / 2;
     ring.position.y = -0.014;
     this.scene.add(ring);
+    this.lighting = new ShowroomLighting(this.scene, this.renderer, () => {
+      this.dirty = true;
+    });
     new ResizeObserver(() => {
       this.camera.aspect = host.clientWidth / host.clientHeight;
       this.camera.fov = this.camera.aspect < 1 ? 58 : 36;
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(host.clientWidth, host.clientHeight);
+      this.dirty = true;
     }).observe(host);
     this.renderer.setAnimationLoop(() => {
-      if (this.auto && this.car) this.car.rotation.y += 0.002;
+      if (this.auto && this.car) {
+        this.car.rotation.y += 0.002;
+        this.dirty = true;
+        this.renderer.shadowMap.needsUpdate = true;
+      }
       this.controls.update();
-      this.renderer.render(this.scene, this.camera);
+      if (this.dirty) {
+        this.renderer.render(this.scene, this.camera);
+        this.dirty = false;
+      }
     });
   }
   clear() {
     this.request?.abort();
-    clearTimeout(this.loadTimer);
     this.token++;
+    this.dirty = true;
+    this.renderer.shadowMap.needsUpdate = true;
     if (this.car) {
       this.scene.remove(this.car);
       this.car.traverse((o) => {
@@ -115,24 +129,30 @@ export class Viewer {
     const token = this.token;
     const controller = new AbortController();
     this.request = controller;
-    const currentStatus = (label: string) => { if (token === this.token) this.status(label); };
+    const currentStatus = (label: string) => {
+      if (token === this.token) this.status(label);
+    };
     this.status("DOWNLOADING MODEL · 0%");
-    this.loadTimer = setTimeout(() => {
-      if (token !== this.token) return;
-      this.token++;
-      controller.abort();
-      this.status("MODEL LOAD TIMED OUT · CHECK YOUR CONNECTION AND RETRY");
-    }, 120_000);
     try {
       const url = import.meta.env.BASE_URL + path;
-      const bytes = await downloadModel(url, controller.signal, currentStatus,
-        path === modelAsset.path ? modelAsset.bytes : undefined);
+      const bytes = await downloadModel(
+        url,
+        controller.signal,
+        currentStatus,
+        path === modelAsset.path ? modelAsset.bytes : undefined,
+      );
       if (token !== this.token) return;
       currentStatus("DOWNLOAD COMPLETE · PREPARING 3D MODEL…");
       // Let the browser paint the preparation stage before parsing/texture decoding.
-      await new Promise<void>(resolve => requestAnimationFrame(() => { setTimeout(resolve, 0); }));
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => {
+          setTimeout(resolve, 0);
+        }),
+      );
       if (token !== this.token) return;
-      const gltf = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).parseAsync(bytes, new URL(".", new URL(url, location.href)).href);
+      const gltf = await new GLTFLoader()
+        .setMeshoptDecoder(MeshoptDecoder)
+        .parseAsync(bytes, new URL(".", new URL(url, location.href)).href);
       if (token !== this.token) {
         gltf.scene.traverse((o) => {
           if (o instanceof THREE.Mesh) {
@@ -156,6 +176,8 @@ export class Viewer {
       car.position.y -= b.min.y - c.y;
       car.traverse((o) => {
         if (o instanceof THREE.Mesh) {
+          o.castShadow = true;
+          o.receiveShadow = true;
           const mats = Array.isArray(o.material) ? o.material : [o.material];
           for (const m of mats)
             if (
@@ -169,11 +191,11 @@ export class Viewer {
       });
       this.car = car;
       this.scene.add(car);
-      clearTimeout(this.loadTimer);
+      this.dirty = true;
+      this.renderer.shadowMap.needsUpdate = true;
       this.status("");
     } catch {
       if (token === this.token) {
-        clearTimeout(this.loadTimer);
         this.status("MODEL LOAD FAILED · CHECK YOUR CONNECTION AND RETRY");
       }
     }
@@ -182,6 +204,8 @@ export class Viewer {
     this.camera.position.set(7, 3, 7);
     this.controls.target.set(0, 0.8, 0);
     if (this.car) this.car.rotation.y = 0;
+    this.renderer.shadowMap.needsUpdate = true;
+    this.dirty = true;
     this.controls.update();
   }
   preset(p: string) {
@@ -198,12 +222,14 @@ export class Viewer {
     this.controls.update();
   }
   color(hex: string) {
+    this.dirty = true;
     this.paint.forEach((m) => {
       m.color.set(hex);
       m.needsUpdate = true;
     });
   }
   finish(value: string) {
+    this.dirty = true;
     this.paint.forEach((m) => {
       m.roughness = value === "Matte" ? 0.85 : value === "Satin" ? 0.5 : 0.2;
       m.metalness = value === "Metallic" ? 0.8 : 0.35;
@@ -211,24 +237,10 @@ export class Viewer {
     });
   }
   environment(value: string) {
-    const light = value === "White" || value === "Grey";
-    this.scene.background = new THREE.Color(
-      value === "White"
-        ? 0xd6dcdf
-        : value === "Grey"
-          ? 0x555d64
-          : value === "Sunset"
-            ? 0x35251f
-            : 0x0b1016,
-    );
-    (this.floor.material as THREE.MeshStandardMaterial).color.set(
-      light ? 0x868d90 : 0x12191e,
-    );
-    if (this.scene.fog instanceof THREE.Fog)
-      this.scene.fog.color.copy(this.scene.background as THREE.Color);
-    this.renderer.toneMappingExposure = value === "Sunset" ? 1.25 : 1;
+    this.lighting.preset(value);
   }
   quality(value: string) {
+    this.dirty = true;
     this.renderer.setPixelRatio(
       value === "Low"
         ? 0.75

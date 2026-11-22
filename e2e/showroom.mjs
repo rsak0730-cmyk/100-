@@ -24,6 +24,7 @@ const browser = await playwright.launch({
   headless: true,
 });
 const page = await browser.newPage({ viewport: { width: 1440, height: 950 } });
+page.setDefaultTimeout(120000);
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 page.on("console", (m) => {
@@ -52,6 +53,51 @@ check(
 );
 mkdirSync("e2e/screenshots", { recursive: true });
 await page.screenshot({ path: "e2e/screenshots/showroom-desktop.png" });
+await page.locator("#open-lights").click();
+await page.locator("#light-power").uncheck();
+await page.waitForTimeout(300);
+const blackout = await page.locator("canvas").screenshot();
+check(
+  "Master light power off",
+  !(await page.locator("#light-power").isChecked()),
+);
+await page.locator("#light-power").check();
+await page.waitForTimeout(300);
+const illuminated = await page.locator("canvas").screenshot();
+check(
+  "Light power visibly changes rendered scene",
+  !blackout.equals(illuminated),
+);
+await page.locator("#light-preset").selectOption("Warm");
+check(
+  "Preset updates light colour",
+  (await page.locator("#light-color").inputValue()) === "#ffd4a0",
+);
+await page.locator("#light-brightness").fill("1.5");
+check(
+  "Brightness output updates",
+  (await page.locator("#value-brightness").textContent()) === "1.5",
+);
+await page.locator("#light-left").uncheck();
+await page.locator("#light-color").fill("#d0e0ff");
+await page.locator("#light-accentColor").fill("#ff0088");
+await page.locator("#reset-lights").click();
+check(
+  "Lighting reset restores banks",
+  await page.locator("#light-left").isChecked(),
+);
+check(
+  "Lighting reset restores brightness",
+  (await page.locator("#light-brightness").inputValue()) === "1",
+);
+await page.locator("aside").evaluate((e) => (e.scrollTop = 0));
+await page.evaluate(() => scrollTo(0, 0));
+await page.screenshot({ path: "e2e/screenshots/showroom-lights.png" });
+await page
+  .getByRole("button", { name: "Configure", exact: true })
+  .last()
+  .click();
+
 await page.getByRole("button", { name: "Toronto Red", exact: true }).click();
 check(
   "Paint label updated",

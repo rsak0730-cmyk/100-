@@ -19,7 +19,9 @@ The E2E command requires the preview server already running on 4173. It uses pac
 - Actual attributed M4 Competition exterior GLB; no photographic or procedural car substitute.
 - Orbit drag, zoom, six axis-based camera presets, reset and optional turntable.
 - Seven paint presets, custom colour, four material finishes on the body material group.
-- Four procedural lighting/colour studies, three pixel-ratio quality settings.
+- Procedural 3D showroom with a central display plinth, walls, ceiling softboxes, side panels and architectural accents.
+- Master light power, brightness, light/accent colours, separate ceiling/left/right/accent banks, ambient fill, reflections, exposure, shadows, architecture visibility and four presets. Three pixel-ratio quality settings.
+- No automatic model-loading timeout; selecting another vehicle still cancels the previous request, and network failures still offer retry.
 - 67 unique catalogue records; search, series/category filters, arrows and keyboard navigation.
 - Swipe on the **vehicle identity strip** changes the vehicle; dragging the canvas always orbits. This avoids conflicting gestures.
 - Unavailable records clear the old model and identity immediately and disable paint/rotation controls.
@@ -61,3 +63,11 @@ This is an unofficial study, not affiliated with or endorsed by BMW AG. BMW name
 The loader uses the self-contained Three.js Meshopt decoder. No user installation, external decoder CDN or paid API is needed. A preload starts the model fetch earlier; optional Cache Storage reuses the validated hash-versioned file across visits. Cache failure/private browsing falls back to ordinary fetching. Browser eviction or clearing site data causes another download. Changing model content creates a new filename to avoid stale assets. The original model remains in the repository for reproducibility but is not requested by the viewer.
 
 A smaller transfer is measured, not a promise of a particular load time: parsing, textures and GPU preparation still depend on the device. No throttled-network or real-phone benchmark is claimed.
+
+
+## Showroom lighting
+Open **Showroom lights** in the viewer or the **Lights** side-panel tab. Controls update the real Three.js light rig and visible fixtures; master power also disables environment lighting. Zero brightness or power-off deliberately darkens the scene. UI remains readable so the lights can be restored. `Reset lighting` restores the Signature preset independently of vehicle/camera reset. Settings persist during vehicle switching within the session, not across reloads.
+
+`src/showroom/lighting.ts` owns procedural architecture, area lights, ceiling spotlight and shadow map, accent lights and their settings. No extra room asset download is required. The browser now renders on demand while idle; orbit damping, controls, model loads and active rotation request frames. Shadows are refreshed when the car or rig changes rather than recalculated for every static frame. Real mobile GPU performance remains unmeasured; shadows can be switched off.
+
+Model loading has **no application-imposed deadline**. The AbortController only cancels an obsolete request when switching/retrying models, not a slow active transfer. Actual network/decoder errors still display Retry. Browser/network timeouts outside the application are outside its control.

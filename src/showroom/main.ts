@@ -1,10 +1,35 @@
 import "./style.css";
 import { vehicles } from "./catalogue";
 import { Viewer } from "./viewer";
+import { defaultLighting, type LightingSettings } from "./lighting";
 const app = document.querySelector<HTMLDivElement>("#app")!;
 app.innerHTML = `<header><a class="brand" href="#"><i></i> M ATELIER<span>THE PERFORMANCE ARCHIVE</span></a><nav><button data-tab="showroom" class="active">Showroom</button><button data-tab="models">Models <small>${vehicles.length}</small></button><button data-tab="configure">Configure</button><button data-tab="about">About ↗</button></nav><span class="edition">INDEPENDENT AUTOMOTIVE STUDY <b>01 / 2026</b></span></header>
-<main><section class="stage"><div id="canvas"></div><div class="eyebrow">THE M COLLECTION <span>EST. 1972 — BUILT TO MOVE YOU</span></div><div class="identity"><p id="generation"></p><h1 id="name"></h1><p class="subtitle">PRECISION HAS A PRESENCE.</p></div><div class="mode"><button class="selected">◉ Normal view</button><button disabled title="No verified internal mechanical geometry is available">⚙ Anatomy view <small>UNAVAILABLE</small></button></div><div id="loading" role="status"></div><button id="retry-model" hidden>Retry model download ↻</button><button class="arrow prev" aria-label="Previous vehicle">‹</button><button class="arrow next" aria-label="Next vehicle">›</button><div class="side-note">DESIGNED FOR THE DRIVER.<br>EXPLORED BY YOU.</div><div class="stage-footer"><span><b class="live"></b> REAL-TIME 3D <small>THIRD-PARTY EXTERIOR STUDY</small></span><span>DRAG TO ORBIT <em> / </em> SCROLL TO ZOOM</span><button id="fullscreen">⛶ Fullscreen</button></div></section>
-<aside><div class="panel-head"><span>YOUR VEHICLE</span><span id="counter"></span></div><h2 id="panel-name"></h2><div class="badge" id="availability"></div><div class="tabs"><button class="active" data-panel="configure">Configure</button><button data-panel="details">Details</button><button data-panel="cameras">Cameras</button></div><div id="configure" class="pane"><label>01 <b>EXTERIOR COLOUR</b><span id="paint-name">Original asset</span></label><div class="swatches"></div><label class="custom">Custom paint <input id="custom" type="color" value="#b3c5b4" aria-label="Custom paint colour"></label><label>02 <b>SURFACE FINISH</b></label><div class="finishes">${["Gloss", "Metallic", "Matte", "Satin"].map((x) => `<button>${x}</button>`).join("")}</div><p class="fine">Material studies, not a factory options list. Paint updates body material only; no wheel or trim substitutions.</p><label>03 <b>STUDIO LIGHTING</b></label><select id="environment" aria-label="Studio lighting">${["Dark", "White", "Grey", "Sunset"].map((x) => `<option>${x}</option>`).join("")}</select><p class="fine">Procedural softbox lighting. Sunset is a colour study, not a location HDRI.</p></div><div id="details" class="pane" hidden><h3>Authenticity, before everything.</h3><p>Licensed third-party exterior model. Exact generation, trim fidelity and factory dimensions have not been independently verified.</p><p>Model-year and market-specific performance figures are withheld pending primary-source validation.</p><p>Anatomy, interior, mesh-level component labels and exploded assembly are unavailable: this asset does not provide a verified component hierarchy.</p><a href="https://github.com/coopercodes/bmwGLB" target="_blank" rel="noreferrer">Asset source & attribution ↗</a></div><div id="cameras" class="pane" hidden><h3>Find your perspective.</h3><div class="cameras">${["Hero", "Front", "Rear", "Left", "Right", "Top"].map((x) => `<button>${x}</button>`).join("")}</div><p class="fine">Camera labels use asset axes; OEM orientation is not verified.</p></div><div class="panel-bottom"><label>RENDER QUALITY<select id="quality"><option>Low</option><option selected>Medium</option><option>Ultra</option></select></label><p>BMW M. A different kind of driven.</p></div></aside></main>
+<main><section class="stage"><div id="canvas"></div><div class="eyebrow">THE M COLLECTION <span>EST. 1972 — BUILT TO MOVE YOU</span></div><div class="identity"><p id="generation"></p><h1 id="name"></h1><p class="subtitle">PRECISION HAS A PRESENCE.</p></div><div class="mode"><button class="selected">◉ Normal view</button><button disabled title="No verified internal mechanical geometry is available">⚙ Anatomy view <small>UNAVAILABLE</small></button></div><div id="loading" role="status"></div><button id="retry-model" hidden>Retry model download ↻</button><button class="arrow prev" aria-label="Previous vehicle">‹</button><button class="arrow next" aria-label="Next vehicle">›</button><div class="side-note">DESIGNED FOR THE DRIVER.<br>EXPLORED BY YOU.</div><div class="stage-footer"><span><b class="live"></b> REAL-TIME 3D <small>THIRD-PARTY EXTERIOR STUDY</small></span><span>DRAG TO ORBIT <em> / </em> SCROLL TO ZOOM</span><button id="open-lights">☷ Showroom lights</button><button id="fullscreen">⛶ Fullscreen</button></div></section>
+<aside><div class="panel-head"><span>YOUR VEHICLE</span><span id="counter"></span></div><h2 id="panel-name"></h2><div class="badge" id="availability"></div><div class="tabs"><button class="active" data-panel="configure">Configure</button><button data-panel="details">Details</button><button data-panel="cameras">Cameras</button><button data-panel="lights">Lights</button></div><div id="configure" class="pane"><label>01 <b>EXTERIOR COLOUR</b><span id="paint-name">Original asset</span></label><div class="swatches"></div><label class="custom">Custom paint <input id="custom" type="color" value="#b3c5b4" aria-label="Custom paint colour"></label><label>02 <b>SURFACE FINISH</b></label><div class="finishes">${["Gloss", "Metallic", "Matte", "Satin"].map((x) => `<button>${x}</button>`).join("")}</div><p class="fine">Material studies, not a factory options list. Paint updates body material only; no wheel or trim substitutions.</p><label>03 <b>STUDIO LIGHTING</b></label><select id="environment" aria-label="Studio lighting">${["Signature", "Daylight", "Midnight", "Warm"].map((x) => `<option>${x}</option>`).join("")}</select><p class="fine">Procedural showroom lighting. Open the Lights tab for power, colour, individual banks and advanced controls.</p></div><div id="details" class="pane" hidden><h3>Authenticity, before everything.</h3><p>Licensed third-party exterior model. Exact generation, trim fidelity and factory dimensions have not been independently verified.</p><p>Model-year and market-specific performance figures are withheld pending primary-source validation.</p><p>Anatomy, interior, mesh-level component labels and exploded assembly are unavailable: this asset does not provide a verified component hierarchy.</p><a href="https://github.com/coopercodes/bmwGLB" target="_blank" rel="noreferrer">Asset source & attribution ↗</a></div><div id="cameras" class="pane" hidden><h3>Find your perspective.</h3><div class="cameras">${["Hero", "Front", "Rear", "Left", "Right", "Top"].map((x) => `<button>${x}</button>`).join("")}</div><p class="fine">Camera labels use asset axes; OEM orientation is not verified.</p></div><div id="lights" class="pane" hidden><div class="light-title"><h3>Your space. Your light.</h3><label class="switch-label"><input id="light-power" type="checkbox" checked/> Lights on</label></div><p class="fine">Live 3D showroom lighting. Turn individual light banks on or off and sculpt the reflections.</p><label class="light-field">Lighting preset<select id="light-preset"><option>Signature</option><option>Daylight</option><option>Midnight</option><option>Warm</option></select></label><div class="light-colours"><label>Light colour<input id="light-color" type="color" value="#e6f4ff"/></label><label>Accent colour<input id="light-accentColor" type="color" value="#67dae8"/></label></div>${[
+  ["brightness", "Brightness", 0, 2, 0.05, 1],
+  ["ambient", "Ambient fill", 0, 1, 0.05, 0.35],
+  ["reflections", "Reflections", 0, 1.5, 0.05, 0.65],
+  ["exposure", "Camera exposure", 0.3, 2, 0.05, 1],
+]
+  .map(
+    ([key, name, min, max, step, value]) =>
+      `<label class="light-field">${name}<output id="value-${key}">${value}</output><input id="light-${key}" type="range" min="${min}" max="${max}" step="${step}" value="${value}"/></label>`,
+  )
+  .join("")}<div class="light-banks">${[
+  ["ceiling", "Ceiling softboxes"],
+  ["left", "Left light bank"],
+  ["right", "Right light bank"],
+  ["accent", "Architectural accents"],
+  ["shadows", "Contact shadows"],
+  ["room", "Showroom architecture"],
+]
+  .map(
+    ([key, name]) =>
+      `<label><input id="light-${key}" type="checkbox" checked/> ${name}</label>`,
+  )
+  .join(
+    "",
+  )}</div><button id="reset-lights">↺ Reset lighting</button><p class="fine">Master power also turns off environment reflections. A blackout is intentional—use Lights on to restore the scene. Architecture visibility does not disable the light rig.</p></div><div class="panel-bottom"><label>RENDER QUALITY<select id="quality"><option>Low</option><option selected>Medium</option><option>Ultra</option></select></label><p>BMW M. A different kind of driven.</p></div></aside></main>
 <footer><div><button id="rotate">↻ 360° rotation</button><button id="reset">↺ Reset view</button><button id="browse">▦ Browse collection</button></div><span>UNOFFICIAL · NOT AFFILIATED WITH BMW AG</span><span>WEBGL / <b>LIVE EXPERIENCE</b></span></footer>
 <dialog id="catalogue"><div class="dialog-head"><div><p>THE PERFORMANCE ARCHIVE</p><h2>Find your M.</h2></div><button class="close" aria-label="Close catalogue">✕</button></div><div class="filters"><input id="search" placeholder="Search model or generation…" aria-label="Search vehicles"/><select id="series" aria-label="Series"><option value="">All series</option>${[...new Set(vehicles.map((v) => v.series))].map((s) => `<option>${s}</option>`).join("")}</select><select id="category" aria-label="Category"><option value="">All categories</option><option>Full M</option><option>M Performance</option><option>Classic & special</option></select></div><p class="fine">One exterior reference asset. Other models are catalogue-only. Production dates, drivetrain and technical figures await source validation.</p><div id="results"></div></dialog>
 <dialog id="about"><div class="dialog-head"><h2>Engineering honesty.</h2><button class="close" aria-label="Close about">✕</button></div><p>An independent interactive collection, not an official BMW product. BMW names and trademarks belong to their respective owners.</p><h3>Model credit</h3><p>“BMW M4 Competition M Package” by SRT Performance, licensed CC BY 4.0, distributed via coopercodes/bmwGLB. Display normalization and interactive material modifications are applied. No OEM geometry claim is made.</p><p><a href="https://sketchfab.com/3d-models/bmw-m4-competition-m-package-5c0a2dafb1ad408d9fc9eeef9aee531b">Original creator page ↗</a> · <a href="https://creativecommons.org/licenses/by/4.0/">License ↗</a></p><p>Mechanical anatomy requires an additional licensed, validated modular asset. It is intentionally disabled here rather than fabricated.</p></dialog>`;
@@ -16,7 +41,7 @@ try {
   viewer = new Viewer($("#canvas"), (s) => {
     $("#loading").textContent = s;
     $("#loading").hidden = !s;
-    $("#retry-model").hidden = !/FAILED|TIMED OUT/.test(s);
+    $("#retry-model").hidden = !/FAILED/.test(s);
   });
 } catch {
   $("#loading").textContent = "WebGL unavailable. Browse the collection below.";
@@ -43,7 +68,9 @@ function select(i: number) {
   $("#rotate").toggleAttribute("disabled", !v.model);
   viewer?.load(v.model);
 }
-$("#retry-model").onclick = () => { viewer?.load(vehicles[index].model); };
+$("#retry-model").onclick = () => {
+  viewer?.load(vehicles[index].model);
+};
 const paints = [
   ["Alpine White", "#eeeeea"],
   ["Pearl White", "#ddd9cd"],
@@ -87,8 +114,13 @@ document.querySelectorAll<HTMLButtonElement>(".finishes button").forEach(
 document
   .querySelectorAll<HTMLButtonElement>(".cameras button")
   .forEach((b) => (b.onclick = () => viewer?.preset(b.textContent!)));
-$("#environment").onchange = (e) =>
+$("#environment").onchange = (e) => {
   viewer?.environment((e.target as HTMLSelectElement).value);
+  $<HTMLSelectElement>("#light-preset").value = (
+    e.target as HTMLSelectElement
+  ).value;
+  syncLights();
+};
 $("#quality").onchange = (e) =>
   viewer?.quality((e.target as HTMLSelectElement).value);
 $(".prev").onclick = () => select(index - 1);
@@ -205,3 +237,45 @@ $(".identity").addEventListener(
   { passive: true },
 );
 select(index);
+
+function syncLights() {
+  const settings = viewer?.lighting.settings;
+  if (!settings) return;
+  for (const key of Object.keys(
+    defaultLighting,
+  ) as (keyof LightingSettings)[]) {
+    const input = $<HTMLInputElement>(`#light-${key}`);
+    if (typeof settings[key] === "boolean")
+      input.checked = settings[key] as boolean;
+    else input.value = String(settings[key]);
+    const output = document.querySelector(`#value-${key}`);
+    if (output) output.textContent = String(settings[key]);
+  }
+}
+for (const key of Object.keys(defaultLighting) as (keyof LightingSettings)[]) {
+  const input = $<HTMLInputElement>(`#light-${key}`);
+  input.addEventListener("input", () => {
+    const value =
+      typeof defaultLighting[key] === "boolean"
+        ? input.checked
+        : typeof defaultLighting[key] === "number"
+          ? Number(input.value)
+          : input.value;
+    viewer?.lighting.update({ [key]: value });
+    syncLights();
+  });
+}
+$("#light-preset").onchange = (e) => {
+  viewer?.lighting.preset((e.target as HTMLSelectElement).value);
+  syncLights();
+};
+$("#reset-lights").onclick = () => {
+  viewer?.lighting.update({ ...defaultLighting });
+  $<HTMLSelectElement>("#light-preset").value = "Signature";
+  syncLights();
+};
+$("#open-lights").onclick = () => {
+  pane("lights");
+  $("aside").scrollIntoView({ behavior: "smooth", block: "start" });
+};
+syncLights();
