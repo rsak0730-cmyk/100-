@@ -154,3 +154,27 @@ export const vehicles: Vehicle[] = groups.flatMap(
       model: name === "M4 Competition G82" ? modelAsset.path : null,
     })),
 );
+
+/** Same name across different generations is valid; aliases within one generation are not. */
+export function vehicleLabel(vehicle: Pick<Vehicle, 'name' | 'generation'>): string {
+  return `${vehicle.name} · ${vehicle.generation}`;
+}
+export function canonicalVehicleKey(vehicle: Pick<Vehicle, 'name' | 'generation'>): string {
+  const generation = vehicle.generation.trim().toUpperCase();
+  let name = vehicle.name.toLowerCase().replace(/^bmw\s+/, '').replace(/coupé/g, 'coupe').replace(/\s+/g, ' ').trim();
+  if (generation === 'E24' && name === 'm635csi') name = 'm6';
+  if (generation === 'G83' && name === 'm4 competition convertible m xdrive') name = 'm4 competition convertible';
+  return `${generation}:${name}`;
+}
+export function validateCatalogue(catalogue: readonly Vehicle[]): void {
+  const ids = new Set<string>(), identities = new Set<string>(), assets = new Set<string>();
+  for (const vehicle of catalogue) {
+    const key = canonicalVehicleKey(vehicle);
+    if (ids.has(vehicle.id)) throw new Error(`Duplicate vehicle ID: ${vehicle.id}`);
+    if (identities.has(key)) throw new Error(`Duplicate vehicle or alias: ${vehicleLabel(vehicle)}`);
+    if (vehicle.model && assets.has(vehicle.model)) throw new Error(`3D asset reused for another vehicle: ${vehicle.model}`);
+    ids.add(vehicle.id); identities.add(key);
+    if (vehicle.model) assets.add(vehicle.model);
+  }
+}
+validateCatalogue(vehicles);

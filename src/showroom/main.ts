@@ -1,5 +1,5 @@
 import "./style.css";
-import { vehicles } from "./catalogue";
+import { vehicles, vehicleLabel } from "./catalogue";
 import { Viewer } from "./viewer";
 import { defaultLighting, type LightingSettings } from "./lighting";
 const app = document.querySelector<HTMLDivElement>("#app")!;
@@ -50,7 +50,7 @@ function select(i: number) {
   index = (i + vehicles.length) % vehicles.length;
   const v = vehicles[index];
   $("#name").textContent = v.name.replace("BMW ", "");
-  $("#panel-name").textContent = v.name;
+  $("#panel-name").textContent = vehicleLabel(v);
   $("#generation").textContent =
     `${v.generation} / ${v.category.toUpperCase()} / ${v.body.toUpperCase()}`;
   $("#counter").textContent =
@@ -171,7 +171,7 @@ function render() {
     ? list
         .map(
           (v) =>
-            `<button class="vehicle" data-id="${v.id}"><span class="car-icon">${v.series}</span><span><b>${v.name}</b><small>${v.generation} / ${v.body} / ${v.category}</small></span><em>${v.model ? "EXTERIOR REFERENCE ↗" : "3D MODEL COMING SOON"}</em></button>`,
+            `<button class="vehicle" data-id="${v.id}"><span class="car-icon">${v.series}</span><span><b>${vehicleLabel(v)}</b><small>${v.generation} / ${v.body} / ${v.category}</small></span><em>${v.model ? "EXTERIOR REFERENCE ↗" : "3D MODEL COMING SOON"}</em></button>`,
         )
         .join("")
     : "<p>No matching vehicles. Try another search.</p>";
