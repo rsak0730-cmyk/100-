@@ -18,3 +18,6 @@ coverage/
 
 # Showroom browser report
 e2e/showroom-report.json
+
+# Flagship QA report
+e2e/flagship-report.json

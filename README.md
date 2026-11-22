@@ -1,73 +1,65 @@
-# M ATELIER — independent BMW M exterior study
+# Atelier Motor House
 
-A working Three.js / TypeScript / Vite application, replacing the previous particle-lab entry point. This is an **initial exterior reference implementation, not the completed automotive digital twin requested in the brief**.
+An interactive Three.js architectural automotive gallery, built with TypeScript and Vite. This pass focuses on the environment, atmosphere, interaction and UI—not anatomy or catalogue expansion.
 
-## Run
-```
+## Run and validate
+```bash
 npm ci
 npm run dev -- --host 0.0.0.0
 npm run typecheck
 npm test
 npm run audit:assets
 npm run build
-npm run preview -- --host 0.0.0.0
+npm run verify:build
+npm run preview -- --host 0.0.0.0 --port 4173
+# With preview running in another terminal:
 npm run e2e
 ```
-The E2E command requires the preview server already running on 4173. It uses packaged headless Chromium / software WebGL and extracts its bundled AL2023 libraries; screenshots go to ignored `e2e/screenshots/`. No actual Android/iPhone hardware validation has been performed.
+The browser suite uses packaged Chromium with SwiftShader software WebGL. It extracts bundled Chromium shared libraries under `/tmp`. Screenshots/reports in `e2e/` are generated and ignored. Visitors need only a compatible browser; no installation, paid API or subscription.
 
-## Available
-- Actual attributed M4 Competition exterior GLB; no photographic or procedural car substitute.
-- Orbit drag, zoom, six axis-based camera presets, reset and optional turntable.
-- Seven paint presets, custom colour, four material finishes on the body material group.
-- Procedural 3D showroom with a central display plinth, walls, ceiling softboxes, side panels and architectural accents.
-- Master light power, brightness, light/accent colours, separate ceiling/left/right/accent banks, ambient fill, reflections, exposure, shadows, architecture visibility and four presets. Three pixel-ratio quality settings.
-- No automatic model-loading timeout; selecting another vehicle still cancels the previous request, and network failures still offer retry.
-- 67 unique catalogue records; search, series/category filters, arrows and keyboard navigation.
-- Swipe on the **vehicle identity strip** changes the vehicle; dragging the canvas always orbits. This avoids conflicting gestures.
-- Unavailable records clear the old model and identity immediately and disable paint/rotation controls.
-- Responsive layout, modal catalogue, visible creator attribution and limitations.
-
-## Not available / not validated
-- Full component anatomy, component selection, isolation, relationships, exploded animation, interior navigation: disabled, no verified component geometry.
-- Other catalogue models: coming soon, no reused car geometry.
-- Exact factory trim fidelity, production dates, market/model-year specifications: unverified and withheld.
-- Adaptive FPS-based quality, HDRI locations, SSR, progressive LODs and performance budgets: not implemented. Source asset is 22.74 MB; the served lossless Meshopt variant is 15.28 MB (32.8% smaller), with unchanged texture bytes and verified exact geometry data. Quality selection changes resolution, not geometry complexity.
-- Production readiness and mid-range phone frame rate: not established. Headless SwiftShader checks are not device benchmarks.
-- Catalogue is not yet a validated historical database. Some entries represent selected generations rather than all possible trims/years. M635CSi is treated as the M6 E24 market-name alias; G83 Competition Convertible includes the M xDrive name alias, not a duplicate entry.
+## Current experience
+- Central M4 exterior reference on a premium platform; two reserved presentation islands.
+- 36 × 28 m procedural gallery: stone floor/joints, coffered ceiling/beams/columns, glass entrance and handles, walnut/fluted reception, customer lounge, furniture, shelves, stands, material artwork, planters and exterior arrival court.
+- Locally generated stone, wood and fabric maps; PBR metal/glass/leather approximations. No flat photo replaces the environment.
+- Master lighting, six light groups with independent brightness, colour temperature, custom light/accent colours, ambient/directional contributions, reflections/environment brightness, exposure, shadows and shadow strength.
+- Seven presets: Luxury Warm, Pure White, Cinematic Night, Sunset, Cool Modern, Studio Photography, Ambient Evening. Restore Signature independently of the camera.
+- Daytime, Evening, Night and Sunset alter sky background and actual directional light colour/intensity/elevation. Outdoor brightness and glazing reflection controls.
+- Ten smooth, reduced-motion-aware camera presets; orbit/pan/zoom, camera position limits, reset and fullscreen request.
+- Actual mesh raycasting for the car, platforms, ceiling fixtures, glazing, desk, lounge and displays. Context metadata, focus and light-adjustment shortcut. Accessible object selector provides the same selection without precise pointer use.
+- Responsive collapsible control panel, keyboard tabs, labelled controls, credits dialog, WebGL error fallback.
+- Lossless Meshopt vehicle compression (22.74 → 15.28 MB), optional hash-versioned browser cache, preloading, no application-imposed model loading deadline.
+- On-demand rendering, batched static architecture, cached shadow maps, DPR quality controls, automatic reduction after sustained slow renders, render/FPS/object-count telemetry.
 
 ## Architecture
-- `src/showroom/catalogue.ts`: catalogue identities and strict one-asset mapping.
-- `src/showroom/viewer.ts`: GLTF loading, stale-request protection, normalization, lighting, controls, material updates and cleanup.
-- `src/showroom/main.ts`: working catalogue, configuration and availability UI.
-- `src/showroom/style.css`: responsive showroom layout.
-- `public/models/manifest.json`: provenance and feature availability.
-- `scripts/audit-model.mjs`: GLB header, resource and hash audit.
-- `docs/showroom/ASSETS.md`: asset license evidence, restrictions and acquisition gate.
-- Previous particle-lab sources/tests remain in the repository but are not loaded by the new entry point. Their tests must not be counted as showroom coverage.
+- `app/index.html`: editable Vite entry.
+- `src/showroom/flagship.ts`, `flagship.css`: current focused showroom UI.
+- `architecture.ts`: reusable architecture, materials, furniture, courtyard, interactive object registry and static batching.
+- `lighting.ts`: actual light objects, group settings, atmosphere and presets.
+- `cameras.ts`: position/target presets.
+- `viewer.ts`: model lifecycle, mesh picking, selection highlight, camera interpolation, controls, quality and render telemetry.
+- `download.ts`, `model-asset.json`: versioned asset loading, streaming progress and optional cache.
+- `public/models/manifest.json`: vehicle license/provenance. `showroom-architecture.json`: environment manifest/limitations.
+- `docs/flagship/DESIGN.md`, `QA.md`: references, decisions and measured test scope.
+- Previous catalogue/particle-lab code remains in the repository but is not loaded by the current entry point. Do not count legacy tests as current UI coverage.
 
 ## GitHub Pages
-`.github/workflows/deploy.yml` installs dependencies, typechecks, runs tests, audits the GLB, builds, verifies output and uploads `dist` to Pages. Vite `base: './'` supports `/100-/`; public asset requests use `import.meta.env.BASE_URL`.
+The current repository uses legacy Pages publishing from `arena/d00425a0-100`, root `/`.
+```bash
+npm run publish:branch
+# Commit the source plus generated root index.html, assets/ and models/; push the current branch.
+```
+`publish:branch` builds then copies `dist` assets into the tracked root required by legacy Pages. `.nojekyll` prevents Jekyll interpretation. Vite `base: './'` and relative URLs support `https://rsak0730-cmyk.github.io/100-/`. Do not edit generated root HTML directly.
 
-**Current branch deployment:** Pages now publishes `arena/d00425a0-100` at `/` using legacy branch publishing. The tracked root `index.html`, `assets/`, `models/` and `.nojekyll` are the production website. Editable Vite HTML lives in `app/index.html`; application source remains in `src/showroom/`.
+`.github/workflows/deploy.yml` also supports an eventual switch to GitHub Actions Pages publishing: install, typecheck, test, audit, build, verify and deploy. It runs on main pushes/manual dispatch; the current branch-root Pages deployment is GitHub's built-in pipeline and does not need that switch. Do not merge merely to deploy this branch.
 
-After source changes, run `npm run publish:branch`, commit the generated root files along with the source, and push this branch. GitHub's branch Pages build then publishes without requiring a merge or manual workflow dispatch. Do not edit the generated root HTML directly. The model is intentionally copied into the published root because legacy Pages cannot use Vite's `public/` mapping.
+## Reproduce lossless optimization
+`npm run optimize:model` compresses the untouched source GLB without quantization, simplification or texture changes. It checks exact attributes, material definitions, node transforms, texture bytes and equivalent triangle winding, updates the versioned asset and preload. Then rebuild/publish. See `docs/showroom/optimization.json`.
 
-The existing Actions workflow is an alternative for a future switch to Actions-based publishing; it is not required for the current branch-root deployment.
+## Assets and honest limitations
+The M4 is “BMW M4 Competition M Package” by 𝙎𝙍𝙏 𝙋𝙚𝙧𝙛𝙤𝙢𝙖𝙣𝙘𝙚™, distributed via [coopercodes/bmwGLB](https://github.com/coopercodes/bmwGLB), license stated as [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Attribution and changes are visible in the app. See `docs/showroom/ASSETS.md`. BMW design/trademark rights and exact factory fidelity are not independently cleared. This is unofficial and not affiliated with BMW AG.
 
-This is an unofficial study, not affiliated with or endorsed by BMW AG. BMW names, designs and trademarks belong to their owners. See ASSETS.md before commercial redistribution.
+There is **one acquired car**, not a multi-car collection. Secondary islands are intentionally unoccupied, with honest information stands. No vehicle anatomy or new catalogue acquisition is claimed.
 
+The room is original procedural architecture/furniture, not scanned photorealism. Floor/glass reflections are environment-based, **not** car-reflecting SSR, planar mirrors or ray tracing. Only the presentation spotlight casts dynamic shadows. No architectural walking collision system, opening doors, baked GI, HDRI location, KTX2 texture delivery or physical photometric calibration is implemented. These boundaries mean the full ultra-photoreal flagship quality target is not claimed as complete.
 
-## Lossless loading optimization
-`npm run optimize:model` creates the hash-versioned Meshopt variant from the untouched source GLB, updates the asset manifest/preload reference, and verifies decoded attribute values, triangle geometry, texture bytes, materials and node transforms. No simplification, quantization, texture resizing or lossy filtering is used. See `docs/showroom/optimization.json`.
-
-The loader uses the self-contained Three.js Meshopt decoder. No user installation, external decoder CDN or paid API is needed. A preload starts the model fetch earlier; optional Cache Storage reuses the validated hash-versioned file across visits. Cache failure/private browsing falls back to ordinary fetching. Browser eviction or clearing site data causes another download. Changing model content creates a new filename to avoid stale assets. The original model remains in the repository for reproducibility but is not requested by the viewer.
-
-A smaller transfer is measured, not a promise of a particular load time: parsing, textures and GPU preparation still depend on the device. No throttled-network or real-phone benchmark is claimed.
-
-
-## Showroom lighting
-Open **Showroom lights** in the viewer or the **Lights** side-panel tab. Controls update the real Three.js light rig and visible fixtures; master power also disables environment lighting. Zero brightness or power-off deliberately darkens the scene. UI remains readable so the lights can be restored. `Reset lighting` restores the Signature preset independently of vehicle/camera reset. Settings persist during vehicle switching within the session, not across reloads.
-
-`src/showroom/lighting.ts` owns procedural architecture, area lights, ceiling spotlight and shadow map, accent lights and their settings. No extra room asset download is required. The browser now renders on demand while idle; orbit damping, controls, model loads and active rotation request frames. Shadows are refreshed when the car or rig changes rather than recalculated for every static frame. Real mobile GPU performance remains unmeasured; shadows can be switched off.
-
-Model loading has **no application-imposed deadline**. The AbortController only cancels an obsolete request when switching/retrying models, not a slow active transfer. Actual network/decoder errors still display Retry. Browser/network timeouts outside the application are outside its control.
+No physical mobile-device validation, stable FPS guarantee or GPU-memory budget has been established. Current QA uses browser emulation/software WebGL; exact scope is in `docs/flagship/QA.md`.

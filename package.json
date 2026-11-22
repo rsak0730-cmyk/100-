@@ -1,17 +1,18 @@
 {
   "name": "m-atelier-showroom",
   "version": "1.0.0",
-  "description": "Independent BMW M catalogue and attributed interactive M4 exterior reference",
+  "description": "Interactive architectural automotive gallery with procedural showroom, lighting and atmosphere controls",
   "scripts": {
     "test": "vitest run",
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "e2e": "node e2e/showroom.mjs",
+    "e2e": "node e2e/flagship.mjs",
     "audit:assets": "node scripts/audit-model.mjs",
     "publish:branch": "npm run build && node scripts/publish-branch.mjs",
-    "optimize:model": "node scripts/optimize-model.mjs"
+    "optimize:model": "node scripts/optimize-model.mjs",
+    "verify:build": "node scripts/verify-build.mjs"
   },
   "keywords": [],
   "author": "",

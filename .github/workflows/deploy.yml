@@ -29,7 +29,7 @@ jobs:
       - run: npm test
       - run: npm run audit:assets
       - run: npm run build
-      - run: test -s dist/index.html && test -s dist/models/m4.glb && test -s dist/models/manifest.json
+      - run: npm run verify:build
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

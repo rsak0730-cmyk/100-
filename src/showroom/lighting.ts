@@ -1,3 +1,4 @@
+import { buildArchitecture, type Architecture } from "./architecture";
 import * as THREE from "three";
 import { RectAreaLightUniformsLib } from "three/addons/lights/RectAreaLightUniformsLib.js";
 export interface LightingSettings {
@@ -14,6 +15,21 @@ export interface LightingSettings {
   accentColor: string;
   shadows: boolean;
   room: boolean;
+  temperature: number;
+  spotlight: boolean;
+  spotBrightness: number;
+  ceilingBrightness: number;
+  leftBrightness: number;
+  rightBrightness: number;
+  accentBrightness: number;
+  display: boolean;
+  displayBrightness: number;
+  directional: number;
+  environmentBrightness: number;
+  shadowIntensity: number;
+  timeOfDay: string;
+  outdoorBrightness: number;
+  windowReflection: number;
 }
 export const defaultLighting: LightingSettings = {
   power: true,
@@ -29,6 +45,21 @@ export const defaultLighting: LightingSettings = {
   accentColor: "#67dae8",
   shadows: true,
   room: true,
+  temperature: 4500,
+  spotlight: true,
+  spotBrightness: 1,
+  ceilingBrightness: 1,
+  leftBrightness: 1,
+  rightBrightness: 1,
+  accentBrightness: 1,
+  display: true,
+  displayBrightness: 1,
+  directional: 0.35,
+  environmentBrightness: 1,
+  shadowIntensity: 1,
+  timeOfDay: "Daytime",
+  outdoorBrightness: 1,
+  windowReflection: 0.65,
 };
 export const lightingPresets: Record<string, Partial<LightingSettings>> = {
   Signature: { ...defaultLighting },
@@ -56,11 +87,83 @@ export const lightingPresets: Record<string, Partial<LightingSettings>> = {
     accentColor: "#ff9c5a",
   },
 };
+export function kelvinColor(k: number): string {
+  const t = Math.min(9000, Math.max(2200, k)) / 100;
+  const clamp = (x: number) => Math.round(Math.min(255, Math.max(0, x)));
+  const r = t <= 66 ? 255 : 329.698727446 * Math.pow(t - 60, -0.1332047592);
+  const g =
+    t <= 66
+      ? 99.4708025861 * Math.log(t) - 161.1195681661
+      : 288.1221695283 * Math.pow(t - 60, -0.0755148492);
+  const b =
+    t >= 66
+      ? 255
+      : t <= 19
+        ? 0
+        : 138.5177312231 * Math.log(t - 10) - 305.0447927307;
+  return (
+    "#" + [r, g, b].map((v) => clamp(v).toString(16).padStart(2, "0")).join("")
+  );
+}
+Object.assign(lightingPresets, {
+  "Luxury Warm": {
+    ...defaultLighting,
+    temperature: 3500,
+    timeOfDay: "Evening",
+    ambient: 0.45,
+  },
+  "Pure White": {
+    ...defaultLighting,
+    temperature: 6500,
+    brightness: 1.25,
+    ambient: 0.6,
+  },
+  "Cinematic Night": {
+    ...defaultLighting,
+    temperature: 4200,
+    brightness: 0.65,
+    ambient: 0.1,
+    ceilingBrightness: 0.25,
+    timeOfDay: "Night",
+    reflections: 0.4,
+  },
+  Sunset: {
+    ...defaultLighting,
+    temperature: 3200,
+    timeOfDay: "Sunset",
+    directional: 0.75,
+  },
+  "Cool Modern": {
+    ...defaultLighting,
+    temperature: 7500,
+    accentColor: "#90c9ff",
+    timeOfDay: "Daytime",
+  },
+  "Studio Photography": {
+    ...defaultLighting,
+    temperature: 5500,
+    ambient: 0.55,
+    accent: false,
+    spotBrightness: 1.3,
+  },
+  "Ambient Evening": {
+    ...defaultLighting,
+    temperature: 3000,
+    timeOfDay: "Evening",
+    brightness: 0.7,
+    spotBrightness: 0.5,
+    ceilingBrightness: 0.5,
+    ambient: 0.4,
+  },
+});
 export function lightPower(settings: LightingSettings, enabled = true) {
   return settings.power && enabled ? settings.brightness : 0;
 }
 export class ShowroomLighting {
   settings = { ...defaultLighting };
+  built: Architecture;
+  sun = new THREE.DirectionalLight(0xffefdc, 1);
+  displayLight = new THREE.RectAreaLight(0xffffff, 6, 4, 2);
   architecture = new THREE.Group();
   fixtures: {
     mesh: THREE.Mesh;
@@ -78,100 +181,19 @@ export class ShowroomLighting {
   ) {
     RectAreaLightUniformsLib.init();
     this.architecture.name = "Procedural showroom architecture";
-    const wall = new THREE.MeshStandardMaterial({
-      color: 0x1b232b,
-      roughness: 0.65,
-      metalness: 0.25,
-      side: THREE.DoubleSide,
-    });
-    const trim = new THREE.MeshStandardMaterial({
-      color: 0x0f171c,
-      roughness: 0.4,
-      metalness: 0.65,
-    });
-    const mesh = (
-      geo: THREE.BufferGeometry,
-      mat: THREE.Material,
-      x: number,
-      y: number,
-      z: number,
-    ) => {
-      const m = new THREE.Mesh(geo, mat);
-      m.position.set(x, y, z);
-      this.architecture.add(m);
-      return m;
-    };
-    // The room is intentionally procedural architecture, not substitute vehicle geometry.
-    mesh(new THREE.CylinderGeometry(16, 16, 8, 96, 1, true), wall, 0, 3.75, 0);
-    const plinth = mesh(
-      new THREE.CylinderGeometry(3.55, 3.65, 0.2, 128),
-      new THREE.MeshStandardMaterial({
-        color: 0x161e25,
-        metalness: 0.45,
-        roughness: 0.35,
-      }),
-      0,
-      -0.12,
-      0,
-    );
-    plinth.receiveShadow = true;
-    const luminous = (
-      geo: THREE.BufferGeometry,
-      bank: "ceiling" | "left" | "right" | "accent",
-      x: number,
-      y: number,
-      z: number,
-    ) => {
-      const m = mesh(
-        geo,
-        new THREE.MeshBasicMaterial({ color: 0xffffff }),
-        x,
-        y,
-        z,
-      );
-      this.fixtures.push({ mesh: m, bank });
-      return m;
-    };
-    luminous(
-      new THREE.TorusGeometry(3.59, 0.018, 8, 128),
-      "accent",
-      0,
-      -0.015,
-      0,
-    ).rotation.x = Math.PI / 2;
-    for (let i = 0; i < 16; i++) {
-      const a = (i / 16) * Math.PI * 2,
-        x = Math.sin(a) * 15.7,
-        z = Math.cos(a) * 15.7;
-      mesh(new THREE.BoxGeometry(0.14, 7.5, 0.25), trim, x, 3.5, z).rotation.y =
-        a;
-      luminous(
-        new THREE.BoxGeometry(0.035, 5.5, 0.04),
-        "accent",
-        x * 0.99,
-        3.4,
-        z * 0.99,
-      ).rotation.y = a;
-    }
+    this.built = buildArchitecture();
+    this.architecture = this.built.group;
+    this.fixtures.push(...this.built.fixtures);
+    scene.add(this.built.outdoor);
     for (const bank of ["left", "right"] as const) {
       const x = bank === "left" ? -5 : 5;
-      const panel = luminous(
-        new THREE.BoxGeometry(0.045, 0.65, 5),
-        bank,
-        x,
-        3.7,
-        0,
-      );
-      panel.rotation.z = bank === "left" ? -0.3 : 0.3;
       const area = new THREE.RectAreaLight(0xffffff, 7, 5, 0.65);
       area.position.set(x, 3.7, 0);
       area.lookAt(0, 0.6, 0);
       this.areas.push({ light: area, bank });
       scene.add(area);
-      mesh(new THREE.BoxGeometry(0.12, 0.12, 11), trim, x, 6, 0);
     }
     for (const z of [-3, 0, 3]) {
-      luminous(new THREE.BoxGeometry(6, 0.05, 0.3), "ceiling", 0, 6, z);
       const area = new THREE.RectAreaLight(0xffffff, 6, 6, 0.3);
       area.position.set(0, 5.95, z);
       area.lookAt(0, 0, z);
@@ -190,7 +212,17 @@ export class ShowroomLighting {
     this.spot.shadow.mapSize.set(1024, 1024);
     this.spot.shadow.bias = -0.0002;
     this.spot.shadow.normalBias = 0.025;
-    scene.add(this.architecture, this.ambient, this.spot, this.spot.target);
+    this.displayLight.position.set(0, 4.5, 1);
+    this.displayLight.lookAt(0, 0, 0);
+    scene.add(this.displayLight);
+    this.sun.position.set(-8, 12, 16);
+    scene.add(
+      this.architecture,
+      this.ambient,
+      this.spot,
+      this.spot.target,
+      this.sun,
+    );
     renderer.shadowMap.autoUpdate = false;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -198,6 +230,8 @@ export class ShowroomLighting {
   }
   update(patch: Partial<LightingSettings>) {
     Object.assign(this.settings, patch);
+    if (patch.temperature !== undefined)
+      this.settings.color = kelvinColor(patch.temperature);
     this.apply();
   }
   preset(name: string) {
@@ -210,29 +244,56 @@ export class ShowroomLighting {
       power = lightPower(s);
     for (const { light, bank } of this.areas) {
       light.color.set(s.color);
-      light.intensity = (bank === "ceiling" ? 6 : 7) * lightPower(s, s[bank]);
+      light.intensity =
+        (bank === "ceiling" ? 6 : 7) *
+        lightPower(s, s[bank]) *
+        s[`${bank}Brightness`];
     }
     for (const { mesh, bank } of this.fixtures) {
       const m = mesh.material as THREE.MeshBasicMaterial;
       m.color
         .set(bank === "accent" ? s.accentColor : s.color)
-        .multiplyScalar(lightPower(s, s[bank]));
+        .multiplyScalar(lightPower(s, s[bank]) * s[`${bank}Brightness`]);
     }
     this.ambient.color.set(s.color);
     this.ambient.intensity = s.ambient * power;
     this.spot.color.set(s.color);
-    this.spot.intensity = 70 * lightPower(s, s.ceiling);
+    this.spot.intensity = 70 * lightPower(s, s.spotlight) * s.spotBrightness;
+    this.displayLight.color.set(s.color);
+    this.displayLight.intensity =
+      6 * lightPower(s, s.display) * s.displayBrightness;
     this.spot.castShadow = s.shadows;
+    this.spot.shadow.intensity = s.shadowIntensity;
     for (const p of this.accentLights) {
       p.color.set(s.accentColor);
-      p.intensity = 7 * lightPower(s, s.accent);
+      p.intensity = 7 * lightPower(s, s.accent) * s.accentBrightness;
     }
-    this.scene.environmentIntensity = s.reflections * power;
+    this.scene.environmentIntensity =
+      s.reflections * power * s.environmentBrightness;
     this.renderer.toneMappingExposure = s.exposure;
     this.renderer.shadowMap.enabled = s.shadows;
     this.architecture.visible = s.room;
-    this.scene.background = new THREE.Color(0x060a10);
+    const daylight: Record<
+      string,
+      { sky: number; sun: number; tint: number; y: number }
+    > = {
+      Daytime: { sky: 0x9eafb5, sun: 1.5, tint: 0xfff0dc, y: 15 },
+      Evening: { sky: 0x50596a, sun: 0.35, tint: 0xe2c2c4, y: 6 },
+      Night: { sky: 0x101b30, sun: 0.07, tint: 0x7998d5, y: 10 },
+      Sunset: { sky: 0xb88a70, sun: 0.8, tint: 0xffbb77, y: 3 },
+    };
+    const day = daylight[s.timeOfDay] || daylight.Daytime;
+    this.scene.background = new THREE.Color(day.sky).multiplyScalar(
+      s.outdoorBrightness,
+    );
+    this.sun.intensity = day.sun * s.directional * s.outdoorBrightness * power;
+    this.sun.color.set(day.tint);
+    this.sun.position.y = day.y;
+    this.built.glass.envMapIntensity = s.windowReflection * 2;
+    this.built.glass.opacity = 0.08 + s.windowReflection * 0.18;
+
     // Power-off is a genuine blackout; the HTML controls remain available to restore light.
-    if (this.scene.fog instanceof THREE.Fog) this.scene.fog.color.set(0x060a10);
+    if (this.scene.fog instanceof THREE.Fog)
+      this.scene.fog.color.copy(this.scene.background as THREE.Color);
   }
 }
